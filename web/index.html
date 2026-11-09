@@ -176,11 +176,7 @@ dt{color:var(--steel)}dd{margin:0;word-break:break-word}
   </div>
   <div class="header-actions">
     <button id="themeBtn" class="theme-btn" type="button" aria-label="Toggle dark mode"><span class="moon">🌙</span><span class="sun">☀️</span></button>
-    <select id="lang" aria-label="Language">
-      <option value="en">English</option>
-      <option value="hi">हिन्दी</option>
-      <option value="bn">বাংলা</option>
-    </select>
+   
   </div>
 </header>
 
@@ -755,7 +751,7 @@ $('f').addEventListener('submit', async (e) => {
     });
     const j = await res.json();
     if (!res.ok) $('out').replaceChildren(el('p', {class: 'err'}, 'Could not check that link. ' + (j.detail || '') + ' Enter a full address that starts with http:// or https://.'));
-    if (!res.ok) window.olfaMood && olfaMood('idle', 'That address did not work. Try a full link starting with https://');
+   
     else render(j);
   } catch (err) {
     $('out').replaceChildren(el('p', {class: 'err'}, 'Could not reach the Olfa service. Check that it is running and try again.'));
