@@ -747,7 +747,7 @@ $('f').addEventListener('submit', async (e) => {
     const res = await fetch('/scan', {
       method: 'POST',
       headers: {'content-type': 'application/json'},
-      body: JSON.stringify({url: $('u').value.trim(), deep: !$('quick').checked, lang: $('lang').value})
+      body: JSON.stringify({url: $('u').value.trim(), deep: !$('quick').checked, lang: 'en'})
     });
     const j = await res.json();
     if (!res.ok) $('out').replaceChildren(el('p', {class: 'err'}, 'Could not check that link. ' + (j.detail || '') + ' Enter a full address that starts with http:// or https://.'));
