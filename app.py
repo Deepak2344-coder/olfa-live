@@ -7,6 +7,9 @@ POST /scan         {url, deep?, lang?}            -> shared risk schema + pillar
 POST /report       {url, verdict, note?}          header X-Reporter-Token required
 POST /chat         {message, context?}            -> AI cybersecurity assistant
 GET  /intel/lookup?url=...                         community status of a domain
+GET  /intel/related?url=...                        related domains and shared infrastructure
+POST /ledger/commit  GET /ledger/verify/{id}  GET /ledger/history/{id}   report integrity ledger
+GET  /ledger/anchors  POST /ledger/anchor  GET /ledger/anchors/verify   public testnet anchor
 GET  /intel/feed                                   confirmed-malicious domains
 GET  /intel/recent                                recent community reports
 GET  /health
@@ -55,6 +58,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from olfa_core import message as message_analyzer
 from olfa_core.intel import Intel
 from olfa_core.scanner import Scanner
 from olfa_core.urlparts import normalize_url
@@ -109,6 +113,12 @@ scan_limiter = ChatRateLimiter(
     limit_per_minute=int(os.environ.get("OLFA_SCAN_PER_MIN", "30")),
     limit_per_hour=int(os.environ.get("OLFA_SCAN_PER_HOUR", "600")),
     what="scans",
+)
+
+message_limiter = ChatRateLimiter(
+    limit_per_minute=int(os.environ.get("OLFA_MSG_PER_MIN", "10")),
+    limit_per_hour=int(os.environ.get("OLFA_MSG_PER_HOUR", "200")),
+    what="message checks",
 )
 
 
@@ -225,6 +235,11 @@ class ScanRequest(BaseModel):
     lang: str = "en"
 
 
+class MessageRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=4000)
+    deep: bool = True
+
+
 class ReportRequest(BaseModel):
     url: str = Field(..., max_length=4096)
     verdict: str
@@ -270,6 +285,16 @@ def scan(req: ScanRequest, request: Request) -> dict:
         raise HTTPException(400, f"bad url: {exc}") from exc
 
 
+@app.post("/analyze-message")
+def analyze_message_endpoint(req: MessageRequest, request: Request) -> dict:
+    ok, msg = message_limiter.check(request.client.host if request.client else "unknown")
+    if not ok:
+        raise HTTPException(429, msg)
+    key = os.environ.get("GEMINI_API_KEY") or DEFAULT_GEMINI_KEY
+    explainer = message_analyzer.gemini_explainer(key) if key else None
+    return message_analyzer.analyze(req.text, scanner, explainer=explainer, deep=req.deep)
+
+
 @app.post("/report")
 def report(req: ReportRequest, request: Request, x_reporter_token: Optional[str] = Header(None)) -> dict:
     token = x_reporter_token
@@ -310,6 +335,8 @@ def report(req: ReportRequest, request: Request, x_reporter_token: Optional[str]
         raise HTTPException(429, str(exc)) from exc
 
     scanner._cache.clear()
+    if scanner.intel.anchor.configured:  # fire and forget: a chain problem must never slow or break a report
+        threading.Thread(target=scanner.intel.anchor.anchor, daemon=True).start()
     return {
         "ok": True,
         "domain": out.get("domain"),
@@ -319,6 +346,7 @@ def report(req: ReportRequest, request: Request, x_reporter_token: Optional[str]
         "top_verdict": out.get("top_verdict"),
         "verdict": canonical_verdict,
         "note": req.note.strip() if req.note else "",
+        "ledger_id": out.get("ledger_id"),
     }
 
 
@@ -521,6 +549,70 @@ def chat(req: ChatRequest, request: Request) -> dict:
 @app.get("/intel/lookup")
 def intel_lookup(url: str) -> dict:
     return scanner.intel.lookup(url)
+
+
+@app.post("/ledger/commit")
+def ledger_commit(req: ReportRequest, request: Request, x_reporter_token: Optional[str] = Header(None)) -> dict:
+    """Same input as /report (which already commits automatically); returns the ledger record."""
+    out = report(req, request, x_reporter_token)
+    return {"ledger_id": out.get("ledger_id"), "domain": out.get("domain"), "notice": ledger_notice()}
+
+
+def ledger_notice() -> str:
+    from olfa_core.ledger import NOTICE
+    return NOTICE
+
+
+@app.get("/ledger/verify/{record_id}")
+def ledger_verify(record_id: int, request: Request) -> dict:
+    ok, msg = scan_limiter.check(request.client.host if request.client else "unknown")
+    if not ok:
+        raise HTTPException(429, msg)
+    res = scanner.intel.ledger.verify(record_id)
+    if res is None:
+        raise HTTPException(404, "no such ledger record")
+    res["anchor"] = scanner.intel.anchor.coverage(res.get("last_entry_id"))
+    return res
+
+
+@app.get("/ledger/anchors")
+def ledger_anchors() -> dict:
+    return scanner.intel.anchor.status()
+
+
+@app.post("/ledger/anchor")
+def ledger_anchor_now(request: Request) -> dict:
+    ok, msg = scan_limiter.check(request.client.host if request.client else "unknown")
+    if not ok:
+        raise HTTPException(429, msg)
+    return scanner.intel.anchor.anchor(min_gap=60)  # manual anchors still wait at least a minute
+
+
+@app.get("/ledger/anchors/verify")
+def ledger_anchor_verify(request: Request) -> dict:
+    ok, msg = scan_limiter.check(request.client.host if request.client else "unknown")
+    if not ok:
+        raise HTTPException(429, msg)
+    return scanner.intel.anchor.verify_onchain()
+
+
+@app.get("/ledger/history/{record_id}")
+def ledger_history(record_id: int) -> dict:
+    res = scanner.intel.ledger.history(record_id)
+    if res is None:
+        raise HTTPException(404, "no such ledger record")
+    return res
+
+
+@app.get("/intel/related")
+def intel_related(url: str, request: Request) -> dict:
+    ok, msg = scan_limiter.check(request.client.host if request.client else "unknown")
+    if not ok:
+        raise HTTPException(429, msg)
+    if not url or len(url) > 2000:
+        raise HTTPException(400, "url is required (max 2000 characters)")
+    from olfa_core import correlate
+    return correlate.related(scanner.intel, url)
 
 
 @app.get("/intel/feed")

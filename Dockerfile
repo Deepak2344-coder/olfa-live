@@ -6,6 +6,9 @@ ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 OLFA_DB=/data/olfa_intel.db
 COPY requirements.txt requirements.lock* ./
 RUN if [ -f requirements.lock ]; then pip install --no-cache-dir -r requirements.lock; \
     else pip install --no-cache-dir fastapi "uvicorn[standard]" requests cryptography tldextract numpy xgboost scikit-learn joblib; fi
+# eth-account signs the optional testnet anchor transactions (olfa_core/anchor.py). It is not in requirements.lock,
+# so install it separately; without it anchoring reports "not anchored" and everything else keeps working.
+RUN pip install --no-cache-dir eth-account || echo 'WARNING: eth-account not installed; testnet anchoring disabled'
 COPY . .
 RUN useradd -m olfa && mkdir -p /data && cp -n olfa_intel.db /data/olfa_intel.db; chown -R olfa /data /app
 USER olfa

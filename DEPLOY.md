@@ -59,3 +59,9 @@ Caddy gets the HTTPS certificate on its own (it needs the domain pointing at the
 
 ## Cheaper or simpler options
 - **Render / Railway / Fly.io:** use the Dockerfile, mount a disk at `/data`, set the same variables from `.env.example`. They provide HTTPS, so skip Caddy and `docker-compose.yml`.
+
+## Ledger persistence and testnet anchoring (important on Render)
+- The community database **and the ledger** live in one SQLite file (`OLFA_DB`, default `/data/olfa_intel.db`). If the host's disk is wiped on every deploy or restart, the ledger resets while anything already anchored on the testnet stays there, and the two will no longer match. On Render, attach a **persistent disk mounted at `/data`**, or move to a managed Postgres later. Check your plan's disk support first.
+- Back up `/data/olfa_intel.db` regularly (see the backup command above); it is the only copy of the private commitment data.
+- To turn anchoring on, follow `ANCHOR_SETUP.md` and set `OLFA_ANCHOR_RPC` and `OLFA_ANCHOR_KEY` as environment variables in the host's dashboard. Use a throwaway testnet wallet only; never commit the key.
+- `eth-account` is installed separately in the Dockerfile (it is not in `requirements.lock`). If its install failed, the build log shows a WARNING and anchoring stays off.

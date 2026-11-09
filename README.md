@@ -20,7 +20,7 @@ Olfa detects phishing and malicious websites by fusing four independent checks i
 pip install -r requirements.txt
 cp .env.example .env       # then fill in API keys; never commit .env
 python -m uvicorn app:app --port 8790     # UI at http://127.0.0.1:8790/
-python -m pytest tests -q                 # 63 passed, 1 skipped, no internet needed
+python -m pytest tests -q                 # no internet needed (run it after merging: new ledger, anchor, message, DNS and correlation tests were added)
 ```
 
 AI Chat uses `GEMINI_API_KEY` and falls back to `GROQ_API_KEY` automatically, so chat keeps working when Gemini is rate-limited. Both keys are read from the environment only.
@@ -40,6 +40,27 @@ The demo's **Get Extension** tab also serves a ready-made zip; it is built on re
 - `POST /report {url, verdict: phishing|malware|scam|safe, note?}` with header `X-Reporter-Token: <any private random string>`
 - `GET /intel/lookup?url=...`, `GET /intel/feed` (confirmed-malicious domains), `GET /health`
 - `GET /download/olfa-extension.zip` - extension zip with the server address baked in.
+- `POST /analyze-message {text}` - paste an SMS/email/chat: extracts links, emails and phone numbers, scans the links, and reports pushy wording separately (never as proof). Own limiter (`OLFA_MSG_PER_MIN`, `OLFA_MSG_PER_HOUR`).
+- `GET /intel/related?url=...` - related incidents (shared certificate, IP, nameserver, impersonated brand).
+- `GET /ledger/verify/{id}`, `GET /ledger/history/{id}`, `POST /ledger/commit` - report integrity ledger.
+- `GET /ledger/anchors`, `POST /ledger/anchor`, `GET /ledger/anchors/verify` - public testnet anchor.
+
+## Report ledger and blockchain anchoring
+
+Every community report is committed to a tamper-evident ledger (`olfa_core/ledger.py`) and, optionally, the ledger's latest fingerprint is published on a public test blockchain (`olfa_core/anchor.py`).
+
+- **Private side:** the server keeps each report's domain, reporter hash, a canonical JSON and a random salt.
+- **Public hash chain** (`ledger` table): only `commitment = SHA-256(canonical JSON + salt)`, revision, status and timestamp, linked by `prev_hash -> entry_hash`. No domain, URL, note or reporter appears in it.
+- **Status** follows the community consensus (submitted, validated, disputed, revised). A changed re-report from the same reporter becomes a new revision; nothing is overwritten.
+- **Verify** (button on each Community report) recomputes the whole chain and the report's commitments, and says whether an anchor covers it.
+- **Anchor** (optional): a zero-value Sepolia testnet transaction carrying `OLFA1` + the chain head (hash only). If history before that point were rewritten, the head would no longer match the transaction. Setup: `ANCHOR_SETUP.md`. Without configuration the site shows "not anchored yet" and everything else works.
+- The ledger proves a report's integrity and history, not that it is true. Old reports are backfilled on first start; existing data is never altered.
+
+## Other checks added in this version
+
+- **Threat feeds and DNS** (`feeds.py`, `dnsinfo.py`): OpenPhish (no key), URLhaus (optional `URLHAUS_AUTH_KEY`), DNS-over-HTTPS A/AAAA/NS/MX and ASN. Full scans only.
+- **Correlation** (`correlate.py`): deterministic rules link incidents by shared certificate, IP, nameserver or impersonated brand; infrastructure-only links need a community threat report.
+- **Findings and precautions** (`findings.py`, `precautions.py`): every reason carries six plain-language fields and a "what to do now" list.
 
 ## The ML model (olfa-host-v2, retrained)
 

@@ -62,6 +62,16 @@ section.block h4{margin:0 0 10px;font-size:1.02rem;color:var(--ink)}
 ul.reasons{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 ul.reasons li{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:10px 14px;font-size:.92rem}
 ul.reasons small{color:var(--steel);display:block;margin-top:2px}
+textarea.msg-input{width:100%;box-sizing:border-box;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:12px;font:inherit;resize:vertical}
+.msg-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.82rem;overflow-wrap:anywhere}
+@media(max-width:480px){.msg-row button{width:100%}}
+details.finding{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:8px 14px;margin-top:8px;font-size:.92rem}
+details.finding summary{cursor:pointer;font-weight:600;overflow-wrap:anywhere}
+details.finding dl{margin:8px 0 2px;display:grid;grid-template-columns:1fr;gap:2px}
+details.finding dt{color:var(--steel);font-size:.8rem;margin-top:6px}
+details.finding dd{margin:0;overflow-wrap:anywhere}
 .checks{display:grid;gap:6px}
 .check{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:8px 12px}
 .check .name{font-weight:600;font-size:.9rem}
@@ -77,6 +87,11 @@ dt{color:var(--steel)}dd{margin:0;word-break:break-word}
 .msg{color:var(--steel);margin:8px 0 0;font-size:.9rem}
 .err{color:var(--bad)}
 .note{font-size:.85rem;color:var(--steel);max-width:65ch;line-height:1.5}
+.rel-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.rel-item{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);min-width:0}
+.rel-item b{overflow-wrap:anywhere}
+.rel-item .rel-ev{font-size:.8rem;color:var(--steel);overflow-wrap:anywhere;margin-top:2px}
+.rel-tag{display:inline-block;font-size:.72rem;padding:1px 7px;border-radius:99px;border:1px solid var(--line);color:var(--steel);margin-left:6px}
 
 /* AI Scan Summary Card */
 .ai-summary-card{
@@ -161,6 +176,11 @@ dt{color:var(--steel)}dd{margin:0;word-break:break-word}
   </div>
   <div class="header-actions">
     <button id="themeBtn" class="theme-btn" type="button" aria-label="Toggle dark mode"><span class="moon">🌙</span><span class="sun">☀️</span></button>
+    <select id="lang" aria-label="Language">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+      <option value="bn">বাংলা</option>
+    </select>
   </div>
 </header>
 
@@ -168,6 +188,7 @@ dt{color:var(--steel)}dd{margin:0;word-break:break-word}
 <nav class="tabs-nav" aria-label="Main Navigation">
   <button class="tab-btn active" data-tab="scanner">🔍 Scanner</button>
   <button class="tab-btn" data-tab="chat">💬 AI Chat</button>
+  <button class="tab-btn" data-tab="message">✉️ Message Check</button>
   <button class="tab-btn" data-tab="history">📜 History <span id="histCount"></span></button>
   <button class="tab-btn" data-tab="community">🌐 Community</button>
   <button class="tab-btn" data-tab="extension">🧩 Get Extension</button>
@@ -187,6 +208,17 @@ dt{color:var(--steel)}dd{margin:0;word-break:break-word}
   </form>
   <label class="quick"><input id="quick" type="checkbox"> Quick check only (skips visiting the page)</label>
   <div id="out" aria-live="polite"></div>
+</section>
+
+<!-- TAB: MESSAGE CHECK -->
+<section id="tab-message" class="view-section">
+  <h2 class="lead">Paste a suspicious message. See what the evidence says.</h2>
+  <p class="note">Works for SMS, email and chat text. Olfa pulls out links, emails and phone numbers and checks the links. Pushy wording is shown separately and never proves fraud by itself.</p>
+  <form id="mf">
+    <textarea id="mtext" class="msg-input" maxlength="4000" rows="7" placeholder="Paste the message here (up to 4000 characters)" aria-label="Message to check" required></textarea>
+    <div class="msg-row"><span class="note" id="mcount">0 / 4000</span><button id="mgo" type="submit">Check message</button></div>
+  </form>
+  <div id="mout" aria-live="polite"></div>
 </section>
 
 <!-- TAB 2: AI CHAT -->
@@ -422,6 +454,15 @@ function token() {
 // ==========================================
 // Scan Renderer (from Security Lab)
 // ==========================================
+function findingItem(f) {
+  const col = ({high: COLORS.dangerous, medium: COLORS.suspicious, low: COLORS.gray})[f.severity] || COLORS.gray;
+  const rows = [['Technical evidence', f.evidence], ['Potential impact', f.impact], ['Severity', f.severity],
+                ['Recommended fix', f.remediation], ['Limitations', f.limitations]];
+  const dl = el('dl', {});
+  for (const [k, v] of rows) if (v) dl.append(el('dt', {}, k), el('dd', {}, String(v)));
+  return el('details', {class: 'finding', style: '--c:' + col}, el('summary', {}, f.issue + ' (' + f.severity + ')'), dl);
+}
+
 function render(r) {
   lastScanResult = r;
   saveToHistory(r);
@@ -521,6 +562,12 @@ function render(r) {
     out.append(el('section', {class: 'block'}, el('h4', {}, 'Why'), ul));
   } else out.append(el('section', {class: 'block'}, el('h4', {}, 'Why'), el('p', {class: 'note'}, 'None of the checks found a problem. That lowers the risk but does not prove a site is safe.')));
 
+  if (r.precautions && r.precautions.length) {
+    const ul = el('ul', {class: 'reasons todo'});
+    for (const t of r.precautions) ul.append(el('li', {style: '--c:' + (COLORS[r.level] || COLORS.gray)}, t));
+    out.append(el('section', {class: 'block'}, el('h4', {}, 'What you should do'), ul));
+  }
+
   if (r.redirects && r.redirects.length > 1) {
     const box = el('section', {class: 'block'}, el('h4', {}, 'Where the link goes'));
     r.redirects.forEach((h, i) => box.append(el('div', {class: 'hop'}, el('span', {class: 'k'}, 'Step ' + (i + 1) + (h.status ? ' · ' + h.status : '')), el('span', {}, h.url))));
@@ -538,14 +585,52 @@ function render(r) {
       el('dt', {}, 'Connection'), el('dd', {}, [cert.tls_version, leaf.key].filter(Boolean).join(' · ')));
     const chain = el('div', {class: 'chain'});
     cert.chain.forEach((c, i) => chain.append(el('div', {style: '--i:' + i}, c.subject.cn || c.subject.rfc4514)));
-    out.append(el('section', {class: 'block'}, el('h4', {}, 'Certificate'), dl, el('p', {class: 'note'}, 'Chain, from the site down to the authority:'), chain));
+    const certSec = el('section', {class: 'block'}, el('h4', {}, 'Certificate'), dl, el('p', {class: 'note'}, 'Chain, from the site down to the authority:'), chain);
+    const certFindings = (r.reasons || []).filter(x => x.source === 'certificate' && x.issue);
+    if (certFindings.length) certSec.append(el('p', {class: 'note'}, 'Findings (tap to expand):'), ...certFindings.map(findingItem));
+    out.append(certSec);
   }
 
   const w = r.web_assessment;
   if (w && w.fetched) {
     const ul = el('ul', {class: 'reasons'});
     for (const ch of w.checks) ul.append(el('li', {style: '--c:' + (ch.ok ? COLORS.safe : COLORS.gray)}, (ch.ok ? 'Present: ' : 'Missing: ') + ch.name));
-    out.append(el('section', {class: 'block'}, el('h4', {}, 'Page security grade ' + w.grade), el('p', {class: 'note'}, 'Missing headers are common on honest sites, so this grade only nudges the verdict.'), ul));
+    const pageFindings = (r.reasons || []).filter(x => x.source === 'web' && x.issue).concat((w.checks || []).filter(c => !c.ok && c.issue));
+    const sec = el('section', {class: 'block'}, el('h4', {}, 'Page security grade ' + w.grade), el('p', {class: 'note'}, 'Missing headers are common on honest sites, so this grade only nudges the verdict.'), ul);
+    if (pageFindings.length) sec.append(el('p', {class: 'note'}, 'Findings (tap to expand):'), ...pageFindings.map(findingItem));
+    out.append(sec);
+  }
+
+  const ti = r.threat_intel;
+  if (ti && ti.line) {
+    const sec = el('section', {class: 'block'}, el('h4', {}, 'Known threat intelligence matches'), el('p', {class: (ti.matches && ti.matches.length) ? 'msg' : 'note'}, ti.line));
+    for (const m of (ti.matches || [])) sec.append(el('p', {class: 'note'}, m.source + ': ' + m.detail));
+    out.append(sec);
+  }
+
+  const d = r.dns;
+  if (d && d.status && d.status.indexOf('skipped') !== 0 && d.status !== 'n/a') {
+    const sec = el('section', {class: 'block'}, el('h4', {}, 'DNS and hosting'));
+    if (d.status === 'not_run') sec.append(el('p', {class: 'note'}, 'Not checked: DNS lookups were not available.'));
+    else {
+      const dl = el('dl', {});
+      const add = (k, v) => { if (v) dl.append(el('dt', {}, k), el('dd', {}, v)); };
+      add('Addresses', [].concat(d.a || [], d.aaaa || []).join(', '));
+      add('Hosting network', d.asn ? [d.asn.asn, d.asn.org, d.asn.country].filter(Boolean).join(' · ') : '');
+      add('Name servers', (d.ns || []).join(', '));
+      add('Mail servers', d.mx_checked ? ((d.mx || []).join(', ') || 'none') : '');
+      sec.append(dl);
+      if (d.status === 'partial') sec.append(el('p', {class: 'note'}, 'Some lookups did not answer, so they were not checked.'));
+    }
+    out.append(sec);
+  }
+
+  if (r.deep && r.url) {
+    const rel = el('section', {class: 'block'}, el('h4', {}, 'Related incidents'), el('p', {class: 'note'}, 'Checking related reports…'));
+    out.append(rel);
+    fetch('/intel/related?url=' + encodeURIComponent(r.url)).then(x => x.json().then(j => ({ok: x.ok, j})))
+      .then(({ok, j}) => { rel.replaceChildren(el('h4', {}, 'Related incidents')); if (ok) renderRelated(rel, j); else rel.append(el('p', {class: 'note'}, 'Not checked: ' + (j.detail || 'lookup unavailable.'))); })
+      .catch(() => { rel.replaceChildren(el('h4', {}, 'Related incidents'), el('p', {class: 'note'}, 'Not checked: lookup unavailable.')); });
   }
 
   const i = r.intel;
@@ -607,6 +692,55 @@ async function fetchAiScanSummary(scanData) {
   }
 }
 
+// Message Check
+$('mtext').addEventListener('input', () => { $('mcount').textContent = $('mtext').value.length + ' / 4000'; });
+function chips(list) { return el('div', {class: 'chips'}, list.map(x => el('span', {class: 'chip'}, x))); }
+function renderMessage(r) {
+  const col = ({fraudulent: COLORS.dangerous, suspicious: COLORS.suspicious, unverified: COLORS.gray, clear: COLORS.safe})[r.risk_class] || COLORS.gray;
+  const out = [];
+  out.push(el('div', {class: 'verdict', style: '--c:' + col}, el('h3', {}, r.label), el('p', {}, r.disclaimer)));
+  out.push(el('section', {class: 'block'}, el('h4', {}, 'Explanation' + (r.explanation_source === 'gemini' ? ' (AI-written)' : '')), el('p', {}, r.explanation)));
+  const ev = r.verified_evidence || [];
+  const evSec = el('section', {class: 'block'}, el('h4', {}, 'Verified evidence'));
+  if (ev.length) { const ul = el('ul', {class: 'reasons'}); for (const e of ev) ul.append(el('li', {style: '--c:' + (e.severity === 'high' ? COLORS.dangerous : COLORS.suspicious)}, e.detail, el('small', {}, e.target))); evSec.append(ul); }
+  else evSec.append(el('p', {class: 'note'}, 'None. No flagged link, community report or brand mismatch was found.'));
+  out.push(evSec);
+  const lang = r.suspicious_language || {}, cats = Object.keys(lang);
+  const lSec = el('section', {class: 'block'}, el('h4', {}, 'Suspicious language (not proof)'));
+  if (cats.length) for (const c of cats) lSec.append(el('p', {class: 'note'}, c.replace('_', ' ') + ':'), chips(lang[c]));
+  else lSec.append(el('p', {class: 'note'}, 'No pressure or scam wording found.'));
+  out.push(lSec);
+  const ind = r.indicators || {};
+  const iSec = el('section', {class: 'block'}, el('h4', {}, 'Found in the message'));
+  for (const [k, label] of [['urls', 'Links'], ['emails', 'Email addresses'], ['phones', 'Phone numbers']]) if ((ind[k] || []).length) iSec.append(el('p', {class: 'note'}, label + ':'), chips(ind[k]));
+  if (!iSec.querySelector('.chips')) iSec.append(el('p', {class: 'note'}, 'No links, email addresses or phone numbers.'));
+  out.push(iSec);
+  if ((r.links || []).length) {
+    const ul = el('ul', {class: 'reasons'});
+    for (const l of r.links) ul.append(el('li', {style: '--c:' + (l.status !== 'scanned' ? COLORS.gray : COLORS[l.level] || COLORS.gray)}, l.url, el('small', {}, l.status === 'scanned' ? 'Verdict: ' + l.level : 'Not checked')));
+    out.push(el('section', {class: 'block'}, el('h4', {}, 'Link results'), ul));
+  }
+  const ul = el('ul', {class: 'reasons'});
+  for (const t of r.precautions) ul.append(el('li', {style: '--c:' + col}, t));
+  out.push(el('section', {class: 'block'}, el('h4', {}, 'What you should do'), ul));
+  for (const n of (r.notes || [])) out.push(el('p', {class: 'note'}, n));
+  $('mout').replaceChildren(...out);
+}
+$('mf').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('mgo'); btn.disabled = true; btn.textContent = 'Checking…';
+  $('mout').replaceChildren(el('p', {class: 'note'}, 'Reading the message and checking its links…'));
+  try {
+    const res = await fetch('/analyze-message', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({text: $('mtext').value})});
+    const j = await res.json();
+    if (!res.ok) $('mout').replaceChildren(el('p', {class: 'err'}, 'Could not check that message. ' + (typeof j.detail === 'string' ? j.detail : 'Check the length (1 to 4000 characters).')));
+    else renderMessage(j);
+  } catch (err) {
+    $('mout').replaceChildren(el('p', {class: 'err'}, 'Could not reach the Olfa service. Check that it is running and try again.'));
+  }
+  btn.disabled = false; btn.textContent = 'Check message';
+});
+
 // Scanner Submit Event
 $('f').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -617,7 +751,7 @@ $('f').addEventListener('submit', async (e) => {
     const res = await fetch('/scan', {
       method: 'POST',
       headers: {'content-type': 'application/json'},
-      body: JSON.stringify({url: $('u').value.trim(), deep: !$('quick').checked})
+      body: JSON.stringify({url: $('u').value.trim(), deep: !$('quick').checked, lang: $('lang').value})
     });
     const j = await res.json();
     if (!res.ok) $('out').replaceChildren(el('p', {class: 'err'}, 'Could not check that link. ' + (j.detail || '') + ' Enter a full address that starts with http:// or https://.'));
@@ -819,6 +953,21 @@ $('communityReportForm').addEventListener('submit', async (e) => {
   btn.textContent = 'Post Report';
 });
 
+const REL_LABEL = {shared_certificate: 'Same certificate', shared_ip: 'Same server address', shared_nameserver: 'Same name server',
+  shared_network: 'Same hosting network', same_impersonated_brand: 'Imitates the same brand'};
+function renderRelated(box, d) {
+  box.append(el('p', {class: 'note'}, d.summary));
+  if (!d.related || !d.related.length) return;
+  const ul = el('ul', {class: 'rel-list'});
+  for (const l of d.related) {
+    const li = el('li', {class: 'rel-item'}, el('div', {}, el('b', {}, l.domain), el('span', {class: 'rel-tag'}, l.strength),
+      l.threat_reports ? el('span', {class: 'rel-tag'}, l.threat_reports + ' report(s)') : null));
+    for (const m of l.matches) li.append(el('div', {class: 'rel-ev'}, (REL_LABEL[m.rule] || m.rule) + ' - ' +
+      Object.entries(m.evidence).map(([k, v]) => k + ': ' + v).join(', ')));
+    ul.append(li);
+  }
+  box.append(ul, el('p', {class: 'note'}, d.method));
+}
 async function loadCommunityIntel() {
   const feedBox = $('confirmedFeed');
   const repBox = $('recentReports');
@@ -870,10 +1019,38 @@ async function loadCommunityIntel() {
           r.note ? el('div', {style: 'font-size:0.82rem;color:var(--ink);background:rgba(255,255,255,0.03);padding:4px 8px;border-radius:4px;margin-top:2px'}, '💬 ' + r.note) : null,
           el('div', {style: 'color:var(--steel);font-size:0.78rem;display:flex;align-items:center;justify-content:space-between;margin-top:2px'},
             el('span', {}, 'Reported ' + dateStr),
-            el('button', {class: 'ghost', style: 'padding:2px 8px;font-size:0.75rem', type: 'button'}, '🔍 Scan')
+            el('span', {style: 'display:flex;gap:6px;flex-wrap:wrap'},
+              el('button', {class: 'ghost rel-btn', style: 'padding:2px 8px;font-size:0.75rem', type: 'button'}, '🔗 Related'),
+              el('button', {class: 'ghost', style: 'padding:2px 8px;font-size:0.75rem', type: 'button'}, '🔍 Scan'))
           )
         );
-        item.querySelector('button').onclick = () => {
+        if (r.ledger_id) {
+          const vOut = el('div', {class: 'rel-ev'});
+          const vBtn = el('button', {class: 'ghost', style: 'padding:2px 8px;font-size:0.75rem', type: 'button'}, 'Verify');
+          vBtn.onclick = async () => {
+            vBtn.disabled = true; vOut.textContent = 'Checking…';
+            try {
+              const x = await fetch('/ledger/verify/' + r.ledger_id); const j = await x.json();
+              vOut.textContent = x.ok ? (j.valid ? 'Record intact: revision ' + j.revision + ', status ' + j.status + ', ' + j.entries_checked + ' ledger entries checked. ' : 'Verification FAILED: ' + (j.problems || []).join('; ') + ' ') + (j.anchor && j.anchor.covered ? (j.anchor.matches_ledger ? 'Anchored on a public test network (tx ' + j.anchor.tx_hash.slice(0, 12) + '…, ' + j.anchor.status + '). ' : 'Anchor does NOT match the ledger. ') : 'Not anchored on a public test network yet. ') + j.notice : 'Not checked: ' + (j.detail || 'unavailable.');
+            } catch (e) { vOut.textContent = 'Not checked: ledger unavailable.'; }
+            vBtn.disabled = false;
+          };
+          item.append(el('div', {style: 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px'},
+            el('span', {class: 'rel-tag', style: 'margin-left:0'}, '🔒 Verified record'), vBtn), vOut);
+        }
+        const relBox = el('div', {style: 'margin-top:6px'});
+        item.append(relBox);
+        item.querySelector('.rel-btn').onclick = async (ev) => {
+          if (relBox.childNodes.length) { relBox.replaceChildren(); return; }
+          relBox.append(el('p', {class: 'note'}, 'Checking…'));
+          try {
+            const x = await fetch('/intel/related?url=' + encodeURIComponent(r.url || r.domain));
+            const j = await x.json();
+            relBox.replaceChildren();
+            if (x.ok) renderRelated(relBox, j); else relBox.append(el('p', {class: 'note'}, 'Not checked: ' + (j.detail || 'unavailable.')));
+          } catch (e) { relBox.replaceChildren(el('p', {class: 'note'}, 'Not checked: lookup unavailable.')); }
+        };
+        item.querySelector('button:not(.rel-btn)').onclick = () => {
           $('u').value = r.url || ('https://' + r.domain);
           document.querySelector('[data-tab="scanner"]').click();
           $('f').requestSubmit();

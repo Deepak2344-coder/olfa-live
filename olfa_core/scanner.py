@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import urlsplit
 
 from . import cert as certmod
-from . import domainage, heuristics, webcheck
+from . import correlate, dnsinfo, domainage, feeds, heuristics, precautions, webcheck
 from .checks import build as build_checks
 from .crawl import crawl
 from .fusion import fuse
@@ -106,8 +106,11 @@ class Scanner:
             # certificate: only meaningful for https destinations we could reach
             # domain age: RDAP lookup runs in parallel with the certificate check
             fhost = host_of(final_url)
-            with ThreadPoolExecutor(max_workers=2) as pool:
+            with ThreadPoolExecutor(max_workers=4) as pool:
                 age_future = pool.submit(domainage.lookup, fhost)
+                if not self.allow_private:  # DNS facts and threat feeds are public-internet lookups
+                    dns_future = pool.submit(dnsinfo.lookup, fhost)
+                    feed_future = pool.submit(feeds.check, [url] + ([final_url] if final_url != url else []))
                 if urlsplit(final_url).scheme == "https":
                     c = pool.submit(certmod.check, fhost, port_of(final_url) or 443,
                                     allow_private=self.allow_private).result()
@@ -119,8 +122,16 @@ class Scanner:
                     cert_reasons = [reason("no_https", "The destination is served over plain http, so there is no certificate to protect it.", "medium", {}, "certificate")]
                 age_info = age_future.result()
             threat += domainage.reasons(age_info)
+            if not self.allow_private:
+                dns_info, ti = dns_future.result(), feed_future.result()
+                threat += dnsinfo.reasons(dns_info, {r["code"] for r in threat}) + ti["reasons"]
+            else:
+                dns_info = {"status": "skipped (private mode)"}
+                ti = {"status": "not_checked", "matches": [], "sources": [], "line": "Known threat intelligence matches: not checked (private mode)"}
         else:
             status["web"] = status["certificate"] = "skipped (quick scan)"
+            dns_info = {"status": "skipped (quick scan)"}
+            ti = {"status": "not_checked", "matches": [], "sources": [], "line": "Known threat intelligence matches: not checked (quick scan)"}
 
         # --- pillar 4: community intel for the link and where it lands
         lookups = [self.intel.lookup(url)]
@@ -137,10 +148,19 @@ class Scanner:
         result = fuse(url, threat=threat, web=web_reasons, cert=cert_reasons, intel=intel_reasons, ml=ml,
                       intel_status=best["status"], status=status,
                       extra={"final_url": final_url, "redirects": hops, "certificate": cert_info,
-                             "web_assessment": web_info, "intel": best, "deep": deep, "notes": notes,
+                             "web_assessment": web_info, "intel": best, "deep": deep, "notes": notes, "dns": dns_info,
+                             "threat_intel": {k: v for k, v in ti.items() if k != "reasons"},
                              "elapsed_ms": int((time.time() - started) * 1000)})
         result["components"] = self._components(result, ml, web_info, cert_info, best, status, web_reasons, cert_reasons)
         result["checks"] = build_checks(reasons=result["reasons"], status=status, deep=deep, domain_age=age_info)
+        result["precautions"] = precautions.build(result["level"], result["reasons"])
+        if deep and not self.allow_private:
+            try:  # correlation data is optional: never let it break a scan
+                facts = correlate.facts_from_scan(result)
+                if facts:
+                    self.intel.observe(registrable(host_of(final_url)), facts, "scan")
+            except Exception:  # noqa: BLE001
+                pass
         self._cache[key] = (time.time(), result)
         if len(self._cache) > 500:
             self._cache.pop(next(iter(self._cache)))

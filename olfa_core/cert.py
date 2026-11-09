@@ -17,6 +17,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from cryptography.x509.oid import ExtensionOID, NameOID
 
+from . import findings
 from .netguard import Blocked, resolve_info
 from .schema import reason
 
@@ -200,7 +201,7 @@ def assess(facts: Dict[str, Any], now: Optional[dt.datetime] = None) -> Dict[str
         # valid but brand new: weak signal alone (free CAs issue instantly), useful with other evidence
         reasons.append(reason("new_certificate", f"The certificate was issued only {max(age_days, 0)} days ago.", "low", {"age_days": age_days}, "certificate"))
     public["level"] = level
-    return {"cert": public, "reasons": reasons}
+    return {"cert": public, "reasons": findings.enrich(reasons, "certificate")}
 
 
 def check(host: str, port: int = 443, **kw: Any) -> Dict[str, Any]:

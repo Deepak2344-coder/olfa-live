@@ -6,6 +6,7 @@ cryptography
 tldextract
 numpy
 xgboost
+eth-account   # only used when testnet anchoring is configured
 # tests / UI check
 pytest
 playwright

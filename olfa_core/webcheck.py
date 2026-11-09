@@ -16,6 +16,7 @@ from urllib.parse import urljoin, urlsplit
 import requests
 from requests.adapters import HTTPAdapter
 
+from . import findings
 from .heuristics import BRANDS, is_official
 from .netguard import Blocked, resolve_info
 from .schema import reason
@@ -263,7 +264,8 @@ def assess(page: Dict[str, Any], final_url: str) -> Dict[str, Any]:
             if re.search(r"\b" + re.escape(brand) + r"\b", title_l) and reg not in doms:
                 reasons.append(reason("brand_impersonation", f"A login page for {brand} is hosted on '{reg}', not on {brand}'s own domain.", "high", {"brand": brand, "domain": reg}, "web"))
                 break
-    return {"web": web, "reasons": reasons}
+    findings.enrich_checks(web["checks"])
+    return {"web": web, "reasons": findings.enrich(reasons, "web")}
 
 
 def check(final_url: str, *, allow_private: bool = False) -> Dict[str, Any]:
