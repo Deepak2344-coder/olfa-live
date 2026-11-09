@@ -7,7 +7,6 @@ import "./lib/hachi-dog.js";
 const els = {
   activeHost: document.getElementById("active-host"),
   overallBadge: document.getElementById("overall-badge"),
-  langSelect: document.getElementById("lang-select"),
   rescanBtn: document.getElementById("rescan-btn"),
 
   gradeRing: document.getElementById("grade-ring"),
@@ -406,17 +405,7 @@ async function init() {
   initHighlightToggle();
 
   currentSettings = await getSettings();
-  els.langSelect.value = currentSettings.language || "en";
   els.msgLangSelect.value = currentSettings.language || "en";
-
-  els.langSelect.addEventListener("change", async (e) => {
-    const nextLang = e.target.value;
-    await chrome.storage.sync.set({ language: nextLang });
-    currentSettings.language = nextLang;
-    if (currentState) {
-      renderOverview(currentState, currentSettings);
-    }
-  });
 
   // Query active tab
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
