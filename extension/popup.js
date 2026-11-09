@@ -115,7 +115,7 @@ function setMascot(key, state) {
 async function checkBackend() {
   const dot = document.getElementById("backend-status-dot");
   try {
-    const base = String(currentSettings?.apiUrl || "https://olfa.onrender.com").replace(/\/+$/, "");
+    const base = String(currentSettings?.apiUrl || "https://olfa-live.onrender.com").replace(/\/+$/, "");
     const ctl = new AbortController();
     const t = setTimeout(() => ctl.abort(), 2000);
     const r = await fetch(`${base}/health`, { signal: ctl.signal });
@@ -467,9 +467,9 @@ document.addEventListener("DOMContentLoaded", init);
 document.getElementById("open-site-btn")?.addEventListener("click", async () => {
   try {
     const settings = await getSettings();
-    const base = String(settings.apiUrl || "https://olfa.onrender.com").replace(/\/+$/, "");
+    const base = String(settings.apiUrl || "https://olfa-live.onrender.com").replace(/\/+$/, "");
     await chrome.tabs.create({ url: `${base}/` });
   } catch {
-    await chrome.tabs.create({ url: "https://olfa.onrender.com/" });
+    await chrome.tabs.create({ url: "https://olfa-live.onrender.com/" });
   }
 });

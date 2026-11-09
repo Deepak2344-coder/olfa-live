@@ -18,7 +18,7 @@ const els = {
 
 async function init() {
   const settings = await getSettings();
-  els.apiUrl.value = settings.apiUrl || "https://olfa.onrender.com";
+  els.apiUrl.value = settings.apiUrl || "https://olfa-live.onrender.com";
   els.useMock.checked = Boolean(settings.useMock);
   els.realtimeBlock.checked = Boolean(settings.realtimeBlock);
   els.blockPopups.checked = Boolean(settings.blockPopups);

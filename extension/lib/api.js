@@ -8,7 +8,7 @@ import { fromScan, fromAnalyze } from "./normalize.js";
 export const DEFAULT_SETTINGS = {
   enabled: true,
   useMock: false,
-  apiUrl: "https://olfa.onrender.com",
+  apiUrl: "https://olfa-live.onrender.com",
   language: "en",
   scanLinks: true,
   inspectPage: true,

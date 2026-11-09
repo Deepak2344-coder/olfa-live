@@ -13,7 +13,7 @@ Mascot: **Hachi** (The Shiba Inu).
 | **Real-Time Navigation Blocker** | `background.js` + `warning.html` | Stops users before visiting confirmed phishing, malware, or brand typosquats; offers "Go Back", "Trust Domain", or "Proceed Once". |
 | **Smart Pop-up & Ad Blocker** | `lib/adblock.js` + `rules.json` + `background.js` | Closes unsolicited popup windows/tabs spawned by shady ad networks and neutralizes transparent full-screen clickjacking overlays. |
 | **Offline Fast URL Triage** | `lib/triage.js` | Zero-latency evaluation (<5ms) using typosquatting checks (16+ top brands), IP literal checks, punycode, and regex rules. Works when completely offline. |
-| **Olfa Core ML Link Analysis** | `lib/api.js` → `POST https://olfa.onrender.com/scan` | Evaluates URL character patterns against the retrained portable model (`olfa_host_v2_portable` XGBoost/LogReg) + Lexical rules. Cached 10 min. |
+| **Olfa Core ML Link Analysis** | `lib/api.js` → `POST https://olfa-live.onrender.com/scan` | Evaluates URL character patterns against the retrained portable model (`olfa_host_v2_portable` XGBoost/LogReg) + Lexical rules. Cached 10 min. |
 | **Live TLS Certificate Inspection** | `improvedML/olfa_core/cert.py` via `api.js` | Connects via raw SSL socket to inspect the true TLS certificate chain (`host -> intermediate -> root CA`), validity days left, and cipher. |
 | **Domain Registration Age** | `improvedML/olfa_core/domainage.py` | Flags burner domains registered only a few days ago via RDAP. |
 | **In-Page Active Threat Detection** | `content/agent.js` + `lib/threats.js` | Finds hidden `<iframe>`s, clickjacking overlays, high-entropy obfuscated scripts, and clipboard/keystroke abuse. |
