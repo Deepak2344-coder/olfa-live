@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Olfa Master Webpage Protector",
+  "version": "1.0.0",
+  "description": "Combined extension detecting clickjacking, obfuscated JS, cookie threats, and dangerous forms",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/agent.js", "content/risk-schema.js"],
+      "css": ["content/style.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "cookies",
+    "webNavigation"
+  ],
+  "icons": {
+    "48": "assets/hachi.png"
+  }
+}

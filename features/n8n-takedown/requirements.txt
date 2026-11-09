@@ -1,0 +1,2 @@
+# n8n-takedown — no runtime dependencies beyond n8n itself.
+# The workflow JSON is self-contained.

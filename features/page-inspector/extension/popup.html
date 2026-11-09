@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Olfa — Page Inspector</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #12161f; --panel: #1b2230; --line: #273041; --text: #e9e5df; --muted: #9a938a;
+        --safe: #35a06a; --warn: #d79a26; --bad: #d8483f;
+      }
+      * { box-sizing: border-box; }
+      body { width: 420px; margin: 0; font: 13px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--text); }
+      header { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+      header img { width: 34px; height: 34px; }
+      header .host { font-weight: 600; word-break: break-all; }
+      header .score { margin-left: auto; font-weight: 700; font-size: 15px; }
+      .score.safe { color: var(--safe); } .score.suspicious { color: var(--warn); } .score.dangerous { color: var(--bad); }
+      nav { display: flex; border-bottom: 1px solid var(--line); }
+      nav button {
+        flex: 1; font: inherit; padding: 9px 4px; background: none; border: 0; color: var(--muted);
+        cursor: pointer; border-bottom: 2px solid transparent;
+      }
+      nav button.active { color: var(--text); border-bottom-color: #f0b429; }
+      section { display: none; padding: 12px 14px; max-height: 380px; overflow: auto; }
+      section.active { display: block; }
+      table { width: 100%; border-collapse: collapse; }
+      td, th { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 12px; }
+      th { color: var(--muted); font-weight: 600; }
+      .flag { font-size: 10px; padding: 1px 6px; border-radius: 999px; margin-left: 4px; white-space: nowrap; }
+      .flag.bad { background: #3b1d22; color: #ff9b9b; }
+      .flag.ok { background: #1d2f23; color: #8fd6a9; }
+      .third { color: #ffc48a; }
+      .post { color: #ff9b9b; font-weight: 600; }
+      ul.reasons { margin: 0; padding-left: 16px; }
+      ul.reasons li { margin-bottom: 6px; }
+      .empty { color: var(--muted); }
+      footer { padding: 10px 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+      code { font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img id="hachi" alt="" />
+      <div>
+        <div class="host" id="host">…</div>
+        <div class="empty" id="summary"></div>
+      </div>
+      <div class="score" id="score">—</div>
+    </header>
+
+    <nav>
+      <button data-tab="cookies" class="active">Cookies</button>
+      <button data-tab="requests">Requests</button>
+      <button data-tab="forms">Forms</button>
+      <button data-tab="storage">Storage</button>
+    </nav>
+
+    <section id="cookies" class="active"><p class="empty">Reading cookies…</p></section>
+    <section id="requests"><p class="empty">Reading requests…</p></section>
+    <section id="forms"><p class="empty">Reading forms…</p></section>
+    <section id="storage"><p class="empty">Reading storage…</p></section>
+
+    <footer>Everything is analysed locally — no cookie values, no page content, nothing sent anywhere. See the README's privacy note.</footer>
+
+    <script src="lib/risk-schema.js"></script>
+    <script src="lib/signals.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

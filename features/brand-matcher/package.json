@@ -1,0 +1,16 @@
+{
+  "name": "olfa-brand-matcher",
+  "version": "1.0.0",
+  "description": "Olfa brand-matcher — detect visual imitation of a brand using pHash",
+  "main": "detect.js",
+  "scripts": {
+    "test": "node --test tests/brand-match.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "imagehash": "^4.3.2",
+    "jsdom": "^24.0.0"
+  }
+}

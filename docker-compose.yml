@@ -1,0 +1,27 @@
+# Olfa production stack: the app plus Caddy, which gets and renews HTTPS certificates by itself.
+services:
+  olfa:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - olfa-data:/data
+    expose:
+      - "8790"
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [olfa]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - OLFA_DOMAIN=${OLFA_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+volumes:
+  olfa-data:
+  caddy-data:
+  caddy-config:

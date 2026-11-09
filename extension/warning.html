@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Olfa Protection — Malicious Site Blocked</title>
+    <style>
+      :root{color-scheme:light;--bg:#fff;--card:#fff;--ink:#5A2F14;--muted:#9A7358;--line:#FFE3C4;--box:#FFF9F0;--red:#E0584C;--red-ink:#B23A30;--red-bg:#FFE1DC;--orange:#FFB45F}
+      *{box-sizing:border-box}
+      body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;color:var(--ink);
+        font:16px/1.55 ui-rounded,"Nunito","Segoe UI",system-ui,sans-serif;
+        background:radial-gradient(500px 360px at 10% 0,#FFE1DC,transparent 70%),radial-gradient(500px 360px at 95% 100%,#FFEBC8,transparent 70%),#fff}
+      .card{width:min(720px,100%);background:#fff;border:0;border-radius:36px;padding:20px 34px 28px;box-shadow:0 14px 40px rgba(255,140,90,.25)}
+      .head{display:flex;gap:8px;align-items:center}
+      .head hachi-dog{flex:none;margin:-14px 0 -10px -18px}
+      h1{margin:0 0 6px;font-size:28px;font-weight:900;color:var(--red-ink);letter-spacing:-.02em;line-height:1.15}
+      .sub{margin:0;color:var(--muted);font-size:15px}
+      .url-box{margin:18px 0 10px;padding:12px 14px;border-radius:16px;background:var(--box);border:2px dashed var(--line);
+        font:13px/1.4 ui-monospace,Consolas,monospace;word-break:break-all}
+      .badge-row{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+      .risk-badge{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:4px 12px;border-radius:999px;background:var(--red-bg);color:var(--red-ink);border:2px solid var(--red)}
+      .risk-score{font-size:13px;color:var(--muted)}
+      h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 10px}
+      ul{margin:0;padding-left:20px}
+      li{margin-bottom:8px;font-size:14px}
+      li .sev{font-size:10px;text-transform:uppercase;font-weight:800;letter-spacing:.06em;padding:2px 7px;border-radius:999px;margin-left:8px;border:1.5px solid}
+      .sev.high{background:var(--red-bg);color:var(--red-ink);border-color:var(--red)}
+      .sev.medium{background:#FFEBC8;color:#8A5200;border-color:#F0B35A}
+      .sev.low{background:rgba(94,158,151,.2);color:#2F7F77;border-color:#5E9E97}
+      .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+      button{font:inherit;font-size:14px;font-weight:800;padding:11px 22px;border-radius:999px;cursor:pointer;border:0;background:#FFF4E6;color:var(--ink);box-shadow:0 3px 0 #FFD9B0;transition:transform .12s}
+      button:hover{transform:translateY(-2px)}
+      button.primary{background:var(--orange);color:#5A2A0C;box-shadow:0 3px 0 #F0993F}
+      
+      button.danger{background:var(--red-bg);color:var(--red-ink);box-shadow:0 3px 0 #F5B9B2}
+      
+      footer{margin-top:22px;font-size:12px;color:var(--muted);border-top:2px solid var(--line);padding-top:14px}
+      @media (max-width:560px){.head{flex-direction:column;text-align:center}.head hachi-dog{margin:0}}
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="head">
+        <hachi-dog id="hachi" state="phishing" style="--hachi-size:190px"></hachi-dog>
+        <div>
+          <h1>Woof! Olfa blocked this site</h1>
+          <p class="sub">Hachi barked and stopped you before this page could load.</p>
+        </div>
+      </div>
+
+      <div class="url-box" id="target">…</div>
+      <div class="badge-row">
+        <span class="risk-badge" id="risk-level">Dangerous</span>
+        <span class="risk-score" id="score"></span>
+      </div>
+
+      <h2>Why Hachi Flagged This Destination</h2>
+      <ul id="reasons"><li>Analyzing security telemetry…</li></ul>
+
+      <div class="actions">
+        <button class="primary" id="back">← Go Back to Safety</button>
+        <button id="trust">Trust This Domain</button>
+        <button class="danger" id="proceed">Proceed Anyway (Unsafe)</button>
+      </div>
+
+      <footer>
+        Active Protection by Olfa &bull; Local heuristics + ML intelligence &bull; No passwords or page data were leaked.
+      </footer>
+    </main>
+    <script type="module" src="lib/hachi-dog.js"></script>
+    <script src="warning.js"></script>
+  </body>
+</html>
+

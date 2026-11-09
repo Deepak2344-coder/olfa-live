@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Olfa — Realtime Blocking",
+  "version": "1.0.0",
+  "description": "Hachi watches every navigation: instant local checks, a friendly full-screen warning, warnings on shaky sites, and risky popup tabs closed automatically.",
+  "minimum_chrome_version": "116",
+  "permissions": ["tabs", "webNavigation", "storage", "scripting", "notifications", "declarativeNetRequest"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "sw.js" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["lib/risk-schema.js", "content/agent.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [{ "id": "blocklist", "enabled": true, "path": "rules.json" }]
+  },
+  "action": { "default_title": "Olfa", "default_popup": "options.html" },
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "web_accessible_resources": [
+    { "resources": ["assets/hachi.png", "warning.html"], "matches": ["<all_urls>"] }
+  ]
+}

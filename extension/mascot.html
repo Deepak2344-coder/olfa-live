@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="mascot.css"></head>
+<body>
+  <div id="stage">
+    <div id="bubble" hidden><b id="bt"></b><span id="bs"></span><button id="bx" title="Dismiss" aria-label="Dismiss">×</button></div>
+    <div id="panel" hidden>
+      <div class="ph"><b id="pv"></b><button id="px" title="Close" aria-label="Close">×</button></div>
+      <div id="pu"></div>
+      <ul id="pr"></ul>
+      <div class="pb"><button data-v="phishing">Report phishing</button><button data-v="scam">Report scam</button><button data-v="safe">Looks safe</button></div>
+      <div id="pf" aria-live="polite"></div>
+    </div>
+    <div id="tilt"><hachi-dog id="dog" state="scanning" style="--hachi-size:116px"></hachi-dog></div>
+    <button id="rep" title="Open report" aria-label="Open report">i</button>
+    <button id="min" title="Let Hachi nap" aria-label="Let Hachi nap">–</button>
+  </div>
+  <script type="module" src="mascot-frame.js"></script>
+</body></html>

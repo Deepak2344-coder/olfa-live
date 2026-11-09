@@ -1,0 +1,12 @@
+{
+  "name": "olfa-masterwebpageext",
+  "version": "1.0.0",
+  "description": "Combined Chrome MV3 extension for Olfa — detects threats and data sharing",
+  "main": "extension/content/agent.js",
+  "scripts": {
+    "test": "node --test extension/content/test-agent.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

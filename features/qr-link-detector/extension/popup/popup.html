@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olfa QR & Redirect Detector</title>
+  <style>
+    body {
+      min-width: 200px;
+      font-family: system-ui, sans-serif;
+      background: #fafafa;
+      color: #111;
+      padding: 8px;
+      line-height: 1.4;
+    }
+    h1 { font-size: 1.2rem; margin: 4px 0 8px 0; }
+    .status { padding: 4px 8px; margin: 4px 0; border-radius: 4px; font-size: 0.85rem; }
+    .safe { background: #e6f4ea; color: #2e7d32; }
+    .suspicious { background: #fff3e0; color: #f57c00; }
+    .dangerous { background: #ffcdd2; color: #c62828; }
+    .loading { background: #e0e0e0; color: #555; }
+    .result-card { border: 1px solid #ddd; border-radius: 6px; padding: 8px; margin: 6px 0; }
+    .result-card.qr { border-left: 4px solid #2e7d32; }
+    .result-card.redirect { border-left: 4px solid #f57c00; }
+    .result-card.tracked { border-left: 4px solid #555; }
+    .no-results { padding: 12px; text-align: center; color: #666; }
+    button { margin-top: 8px; padding: 6px 12px; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h1>Olfa QR & Redirect</h1>
+  <div id="status" class="loading">Scanning page…</div>
+  <div id="results" class="no-results"></div>
+  <button id="refreshBtn">Refresh</button>
+
+  <script>
+    // Wait for background script to provide results
+    let results = null;
+
+    // Try to get stored results immediately
+    chrome.storage.local.get(['qrResults'], (data) => {
+      if (data.qrResults) {
+        results = data.qrResults;
+        updateUI(results);
+      } else {
+        // Send message to background to get current results
+        chrome.runtime.sendMessage({ type: 'get-qr-results' }, (resp) => {
+          if (resp && resp.status === 'ok') {
+            results = resp.results;
+            updateUI(results);
+          } else {
+            updateUI({ qrCodes: [], redirectLinks: [], scanTimestamp: 0 });
+          }
+        });
+      }
+    });
+
+    function updateUI(r) {
+      const status = document.getElementById('status');
+      const resultsDiv = document.getElementById('results');
+      const refreshBtn = document.getElementById('refreshBtn');
+
+      if (!r || (r.qrCodes.length === 0 && r.redirectLinks.length === 0)) {
+        status.textContent = 'No QR codes or redirect links detected on this page.';
+        status.className = 'status safe';
+        resultsDiv.innerHTML = '<div class="no-results">No QR codes or redirect links detected on this page.</div>';
+        refreshBtn.style.display = 'none';
+        return;
+      }
+
+      // Show status
+      const maxSeverity = Math.max(
+        ...r.qrCodes.map(x => x.severity === 'high' ? 3 : x.severity === 'medium' ? 2 : 1),
+        ...r.redirectLinks.map(x => x.severity === 'high' ? 3 : x.severity === 'medium' ? 2 : 1)
+      );
+
+      const levelMap = { high: 'dangerous', medium: 'suspicious', low: 'safe' };
+      status.textContent = `Found ${r.qrCodes.length} QR code(s) and ${r.redirectLink(s)} redirect link(s)`;
+      status.className = `status ${levelMap[levelMap[maxSeverity]] || 'safe'}`;
+
+      // Build results HTML
+      let html = '';
+
+      // QR codes section
+      if (r.qrCodes.length > 0) {
+        html += '<div class="result-card qr"><h4>📷 QR Codes (' + r.qrCodes.length + ')</h4>';
+        for (const qr of r.qrCodes) {
+          html += '<div><strong>Possible QR:</strong> ' + qr.description + '</div>';
+          if (qr.raw && qr.raw.src) {
+            html += '<div style="font-size:0.75rem; margin-top:4px;">Source: ' + qr.raw.src.slice(0, 80) + (qr.raw.src.length > 80 ? '…' : '') + '</div>';
+          }
+        }
+        html += '</div>';
+      }
+
+      // Redirect links section
+      if (r.redirectLinks.length > 0) {
+        html += '<div class="result-card redirect"><h4>🔗 Redirect/Shortened Links (' + r.redirectLinks.length + ')</h4>';
+        for (const link of r.redirectLinks) {
+          const severityClass = { high: 'dangerous', medium: 'suspicious', low: 'safe' }[link.severity] || 'safe';
+          html += '<div><strong>' + link.displayUrl + '</strong> <span style="color:' + getSeverityColor(link.severity) + ';">[' + link.severity + ']</span>';
+          html += ' <span style="font-size:0.75rem; margin-left:8px;">' + link.domain + '</span></div>';
+          if (link.suspiciousParams && link.suspiciousParams.length > 0) {
+            html += '<div style="font-size:0.75rem; margin-top:4px; color:#555;">Tracking params: ' + link.suspiciousParams.join(', ') + '</div>';
+          }
+        }
+        html += '</div>';
+      }
+
+      resultsDiv.innerHTML = html || '<div class="no-results">No results found.</div>';
+      refreshBtn.style.display = 'inline-block';
+    }
+
+    function getSeverityColor(sev) {
+      const colors = { high: '#c62828', medium: '#f57c00', low: '#2e7d32' };
+      return colors[sev] || '#555';
+    }
+
+    // Refresh button
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: 'get-qr-results' }, (resp) => {
+        if (resp && resp.status === 'ok') {
+          updateUI(resp.results);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

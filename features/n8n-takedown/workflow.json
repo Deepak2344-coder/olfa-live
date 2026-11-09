@@ -1,0 +1,64 @@
+{
+  "name": "Phishing Takedown Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes.start",
+      "typeVersion": 1,
+      "position": [ 250, 300 ]
+    },
+    {
+      "parameters": {
+        "dryRun": true,
+        "responseFormat": "json"
+      },
+      "name": "Generate Report",
+      "type": "n8n-nodes.base",
+      "typeVersion": 1,
+      "position": [ 250, 500 ],
+      "notes": "DRY_RUN=true by default — only generates a draft report"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://example.com/api/report",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "name": "Mock Sender",
+      "type": "n8n-nodes.base",
+      "typeVersion": 1,
+      "position": [ 250, 700 ],
+      "notes": "Mock sender — set DRY_RUN=false to enable real sending"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Generate Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Report": {
+      "main": [
+        [
+          {
+            "node": "Mock Sender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionTimeout": 3600
+  }
+}

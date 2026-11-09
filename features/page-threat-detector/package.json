@@ -1,0 +1,12 @@
+{
+  "name": "olfa-page-threat-detector",
+  "version": "1.0.0",
+  "description": "Chrome MV3 content script that detects clickjacking, obfuscated JS and hijack patterns",
+  "main": "extension/content/agent.js",
+  "scripts": {
+    "test": "node --test tests/threat-test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

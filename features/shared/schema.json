@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://olfa.local/schemas/risk-score.json",
+  "title": "Olfa Risk Score",
+  "description": "The one JSON shape every Olfa feature returns and the core app consumes.",
+  "type": "object",
+  "required": ["url", "score", "level", "reasons"],
+  "additionalProperties": true,
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "The thing that was scored. Usually an absolute http(s) URL; other features may put a message id, a domain or a QR payload here.",
+      "examples": ["https://paypa1-login.example/verify"]
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Risk from 0 (harmless) to 1 (certainly malicious)."
+    },
+    "level": {
+      "type": "string",
+      "enum": ["safe", "suspicious", "dangerous"],
+      "description": "Bucket derived from score. safe < 0.4 <= suspicious < 0.75 <= dangerous."
+    },
+    "reasons": {
+      "type": "array",
+      "description": "Ordered, human-readable explanations. Empty means nothing suspicious was found.",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "additionalProperties": true,
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "Stable machine key, e.g. typosquat. Used as the i18n lookup key.",
+            "examples": ["typosquat", "credential_form_cross_origin", "too_many_hops"]
+          },
+          "message": {
+            "type": "string",
+            "description": "One plain-English sentence for the UI."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "default": "medium"
+          },
+          "details": {
+            "type": "object",
+            "description": "Feature-specific extras (element refs, hop lists, matched brand, spans...).",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "url": "https://paypa1-login.example/verify",
+      "score": 0.93,
+      "level": "dangerous",
+      "reasons": [
+        {
+          "code": "typosquat",
+          "message": "The domain imitates paypal.com but is not paypal.com.",
+          "severity": "high",
+          "details": { "brand": "paypal", "distance": 1 }
+        }
+      ]
+    }
+  ]
+}

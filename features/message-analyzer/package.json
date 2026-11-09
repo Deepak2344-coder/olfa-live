@@ -1,0 +1,12 @@
+{
+  "name": "olfa-message-analyzer",
+  "version": "1.0.0",
+  "description": "Olfa message analyzer — scam detection for EN/HI/BN text",
+  "main": "lib/rules.js",
+  "scripts": {
+    "test": "node --test tests/rules.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Popup demo</title>
+    <style>
+      body { font: 16px/1.6 system-ui, sans-serif; max-width: 560px; margin: 80px auto; padding: 0 20px; }
+      .tag { display: inline-block; background: #3b2a1d; color: #ffc48a; border-radius: 999px; padding: 3px 10px; font-size: 12px; }
+      button { font: inherit; padding: 10px 14px; border-radius: 8px; border: 1px solid #333; cursor: pointer; }
+      .note { background: #f6f3ec; border-radius: 10px; padding: 14px; font-size: 14px; margin-top: 18px; }
+    </style>
+  </head>
+  <body>
+    <span class="tag">expected: the new tab is closed + notification with Undo</span>
+    <h1>Popup that opens itself</h1>
+    <p>Phishing pages open extra tabs to show fake login screens. Olfa only closes
+      tabs a page opened on its own — never a tab you opened.</p>
+
+    <button id="spawn">Open the risky page in a new tab (simulates a page-opened popup)</button>
+
+    <div class="note">
+      <b>Why a button?</b> Chrome blocks <code>window.open()</code> on page load
+      without a user gesture, so the demo needs one click to create the popup.
+      What matters is the <em>new tab's</em> gesture state:
+      <code>navigator.userActivation.hasBeenActive</code> is <code>false</code>
+      there, so the extension is allowed to close it.
+    </div>
+
+    <script>
+      document.getElementById('spawn').addEventListener('click', () => {
+        // No 'noopener' on purpose: the extension needs openerTabId to know the
+        // tab came from a page rather than from the user.
+        window.open('/demo/high.html', 'olfa-popup', 'width=900,height=700');
+      });
+      // Also try once on load; Chrome may refuse, and that is fine.
+      window.open('/demo/high.html', 'olfa-popup-load', 'width=900,height=700');
+    </script>
+  </body>
+</html>

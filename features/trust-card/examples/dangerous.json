@@ -1,0 +1,9 @@
+{
+  "domain": "paypa1-secure-login.example",
+  "riskScore": 0.96,
+  "domainAgeDays": 3,
+  "certificate": { "valid": false, "daysToExpiry": 0, "selfSigned": true },
+  "securityHeaders": { "grade": "F", "missing": ["content-security-policy", "strict-transport-security", "x-frame-options"] },
+  "cookies": { "total": 2, "missingSecure": 2, "missingHttpOnly": 2 },
+  "reports": { "count": 27 }
+}

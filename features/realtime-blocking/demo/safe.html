@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Totally Safe Bakery — demo</title>
+    <style>
+      body { font: 16px/1.6 system-ui, sans-serif; max-width: 680px; margin: 60px auto; padding: 0 20px; color: #222; }
+      .tag { display: inline-block; background: #e6f4ea; color: #14603a; border-radius: 999px; padding: 3px 10px; font-size: 12px; }
+      form { margin-top: 24px; display: grid; gap: 10px; max-width: 320px; }
+      input, button { font: inherit; padding: 9px 12px; border-radius: 8px; border: 1px solid #ccc; }
+      button { background: #14603a; color: #fff; border-color: #14603a; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <span class="tag">expected: silent (score ≈ 0.05)</span>
+    <h1>Knead &amp; Co. Bakery</h1>
+    <p>Fresh sourdough every morning. This page is the control case: nothing is
+      wrong with it, so Olfa should stay completely quiet.</p>
+    <p>Newsletter sign-up (same-origin form, so form blocking never applies):</p>
+    <form action="/demo/safe.html" method="get">
+      <input name="email" type="email" placeholder="you@example.com" />
+      <button type="submit">Subscribe</button>
+    </form>
+    <p><a href="/demo/medium.html">Next: the medium-risk page →</a></p>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Olfa QR & Redirect Detector",
+  "version": "1.0.0",
+  "description": "Detects QR codes and redirect/shortened links on web pages; flags them in a popup",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/agent.js"],
+      "css": ["content/popup.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": "assets/hachi.png"
+  },
+  "icons": {
+    "48": "assets/hachi.png"
+  }
+}

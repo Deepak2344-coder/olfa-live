@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olfa page-threat-detector inspector</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #fafafa; color: #111; }
+    .demo { max-width: 800px; margin: 2rem auto; padding: 1rem; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fff; }
+    ul { margin: 0; padding-left: 1.5rem; }
+    li { margin: 0.5rem 0; }
+    .badge { display: inline-block; padding: 2px 6px; background: #e25555; color: #fff; border-radius: 3px; font-size: 0.8rem; margin-left: 4px; }
+  </style>
+</head>
+<body>
+  <div class="demo">
+    <h2>Olfa page-threat-detector inspector</h2>
+    <p>Paste HTML or script text to scan for threats.</p>
+
+    <div class="card">
+      <textarea id="textInput" rows="10" cols="80"
+                placeholder="Paste script text or HTML here…"></textarea>
+      <br>
+      <button id="scanBtn">Scan</button>
+    </div>
+
+    <div id="results" style="display: none;"></div>
+  </body>
+</html>

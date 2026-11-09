@@ -1,0 +1,12 @@
+{
+  "name": "olfa-cert-chain-3d",
+  "version": "1.0.0",
+  "description": "Olfa cert-chain-3d — TLS chain fetch and Three.js visualisation",
+  "main": "chain.js",
+  "scripts": {
+    "test": "echo \"No unit tests (integration-only); demo tested manually.\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

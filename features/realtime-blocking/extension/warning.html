@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Olfa blocked this page</title>
+    <style>
+      :root { color-scheme: light dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100vh; display: grid; place-items: center;
+        font: 16px/1.55 system-ui, -apple-system, Segoe UI, sans-serif;
+        background: radial-gradient(circle at 50% 0%, #2b1d12, #12161f 60%);
+        color: #f4f1ec; padding: 24px;
+      }
+      .card {
+        width: min(680px, 100%); background: #fffdf9; color: #23201c;
+        border-radius: 20px; padding: 28px 30px 24px; box-shadow: 0 30px 80px rgba(0,0,0,.5);
+      }
+      .head { display: flex; gap: 18px; align-items: center; }
+      .head img { width: 84px; height: 84px; flex: 0 0 auto; }
+      h1 { margin: 0 0 4px; font-size: 26px; letter-spacing: -.02em; }
+      .sub { margin: 0; color: #6b6459; font-size: 14px; }
+      .url {
+        margin: 18px 0 6px; padding: 10px 12px; border-radius: 10px;
+        background: #f3efe7; font: 13px/1.4 ui-monospace, Consolas, monospace;
+        word-break: break-all; color: #4a433a;
+      }
+      .score { font-size: 13px; color: #8a6d3b; margin-bottom: 16px; }
+      h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: #8b8378; margin: 18px 0 8px; }
+      ul { margin: 0; padding-left: 20px; }
+      li { margin-bottom: 8px; }
+      li .sev { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 1px 6px; border-radius: 999px; margin-left: 6px; }
+      .sev.high { background: #fde2e1; color: #9b1c1c; }
+      .sev.medium { background: #fff1d6; color: #8a5a00; }
+      .sev.low { background: #e8f0fe; color: #1a4c8b; }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+      button {
+        font: inherit; padding: 11px 18px; border-radius: 10px; cursor: pointer;
+        border: 1px solid #d8d2c7; background: #fff; color: #23201c;
+      }
+      button.primary { background: #1f2937; border-color: #1f2937; color: #fff; }
+      button.danger { background: transparent; border-color: #e6cfcf; color: #9b1c1c; }
+      footer { margin-top: 18px; font-size: 12px; color: #8b8378; }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="head">
+        <img id="hachi" alt="Hachi the Shiba" />
+        <div>
+          <h1>Olfa blocked this page</h1>
+          <p class="sub">Hachi stopped the page before it could ask you for anything.</p>
+        </div>
+      </div>
+
+      <div class="url" id="target">…</div>
+      <div class="score" id="score"></div>
+
+      <h2>Why</h2>
+      <ul id="reasons"><li>Loading the reasons…</li></ul>
+
+      <div class="actions">
+        <button class="primary" id="back">Go back</button>
+        <button id="trust">Trust this site anyway</button>
+        <button class="danger" id="proceed">Proceed anyway (once)</button>
+      </div>
+
+      <footer>Nothing was uploaded. This warning was produced locally by the Olfa extension.</footer>
+    </main>
+    <script src="warning.js"></script>
+  </body>
+</html>

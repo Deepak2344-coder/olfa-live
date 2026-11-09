@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Olfa Shield — Settings &amp; Preferences</title>
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0d1117; color: #f0f6fc; padding: 32px 20px;
+      display: flex; justify-content: center;
+    }
+    .container {
+      width: min(640px, 100%);
+    }
+    header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #30363d;
+    }
+    header img { width: 44px; height: 44px; border-radius: 50%; background: #161b22; }
+    h1 { font-size: 20px; margin: 0; color: #f0f6fc; }
+    .subtitle { font-size: 13px; color: #8b949e; margin: 2px 0 0; }
+    .card {
+      background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+      padding: 18px 20px; margin-bottom: 18px;
+    }
+    h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .05em; color: #8b949e; margin: 0 0 14px; }
+    .field-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid #21262d;
+    }
+    .field-row:last-child { border-bottom: none; }
+    .field-info { flex: 1; padding-right: 20px; }
+    .field-label { font-weight: 600; color: #e6edf3; display: block; margin-bottom: 2px; }
+    .field-desc { font-size: 12px; color: #8b949e; }
+    input[type="text"] {
+      background: #0f141d; color: #f0f6fc; border: 1px solid #30363d; border-radius: 6px;
+      padding: 7px 10px; font-size: 13px; width: 260px; font-family: ui-monospace, Consolas, monospace;
+    }
+    input[type="checkbox"] {
+      width: 18px; height: 18px; cursor: pointer; accent-color: #38bdf8;
+    }
+    button {
+      background: #21262d; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px;
+      padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s ease;
+    }
+    button:hover { background: #30363d; }
+    button.primary { background: #238636; border-color: #2ea043; color: #fff; }
+    button.primary:hover { background: #2ea043; }
+    .feedback {
+      margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 13px;
+      background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #86efac;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="assets/hachi.png" alt="Hachi" />
+      <div>
+        <h1>Olfa Shield Settings</h1>
+        <p class="subtitle">Configure AI Threat Detection, Pop-up Blocking &amp; API Integrations</p>
+      </div>
+    </header>
+
+    <div class="card">
+      <h2>API Configuration</h2>
+      <div class="field-row">
+        <div class="field-info">
+          <label class="field-label" for="api-url">Olfa Core API URL</label>
+          <span class="field-desc">Endpoint for the retrained host ML model, certificate verification, and community feeds.</span>
+        </div>
+        <input type="text" id="api-url" value="https://olfa.onrender.com" />
+      </div>
+
+      <div class="field-row">
+        <div class="field-info">
+          <span class="field-label">Offline Mock Mode</span>
+          <span class="field-desc">Use built-in fixtures when the Python backend server is not running.</span>
+        </div>
+        <input type="checkbox" id="use-mock" />
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Active Protection Features</h2>
+      <div class="field-row">
+        <div class="field-info">
+          <span class="field-label">Real-Time Navigation Blocker</span>
+          <span class="field-desc">Intercept confirmed dangerous or typosquatting links with a full-screen warning page before they load.</span>
+        </div>
+        <input type="checkbox" id="realtime-block" checked />
+      </div>
+
+      <div class="field-row">
+        <div class="field-info">
+          <span class="field-label">Smart Pop-up &amp; Ad Blocker</span>
+          <span class="field-desc">Auto-close unsolicited popup windows and neutralize transparent clickjacking overlays.</span>
+        </div>
+        <input type="checkbox" id="block-popups" checked />
+      </div>
+
+      <div class="field-row">
+        <div class="field-info">
+          <span class="field-label">On-Page Links &amp; QR Quishing Scan</span>
+          <span class="field-desc">Silently audit links and embedded QR codes on visited pages for malicious targets.</span>
+        </div>
+        <input type="checkbox" id="scan-links" checked />
+      </div>
+
+      <div class="field-row">
+        <div class="field-info">
+          <span class="field-label">Floating Hachi Mascot</span>
+          <span class="field-desc">Show Hachi in the corner of each page. She reacts to the safety verdict and warns about flagged links.</span>
+        </div>
+        <input type="checkbox" id="mascot-overlay" checked />
+      </div>
+
+      <div class="field-row">
+        <div class="field-info">
+          <span class="field-label">Mascot Size: <span id="mascot-size-val">116</span> px</span>
+          <span class="field-desc">Make the floating Hachi smaller or bigger. Saves instantly; open pages update live.</span>
+        </div>
+        <input type="range" id="mascot-size" min="64" max="180" step="4" value="116" style="width:140px" />
+      </div>
+
+      <div class="field-row">
+        <div class="field-info">
+          <span class="field-label">Deep Scan by Default</span>
+          <span class="field-desc">Perform full remote crawler hops, domain registration age lookup, and live TLS socket inspection.</span>
+        </div>
+        <input type="checkbox" id="deep-scan" />
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Privacy &amp; Cookie Hygiene</h2>
+      <div class="field-row">
+        <div class="field-info">
+          <span class="field-label">Deep Cookie Inspection Permission</span>
+          <span class="field-desc">Allows checking `Secure` and `HttpOnly` flags. Cookie values are NEVER read or transmitted.</span>
+        </div>
+        <button id="grant-cookie-btn">Check / Grant Permission</button>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content: flex-end; gap: 10px;">
+      <button class="primary" id="save-btn">Save Preferences</button>
+    </div>
+    <div id="save-feedback" class="feedback" hidden>✓ Settings saved successfully. Cache refreshed.</div>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>
+

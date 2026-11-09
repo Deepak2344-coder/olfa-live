@@ -1,0 +1,9 @@
+{
+  "domain": "deals-mega-store.example",
+  "riskScore": 0.52,
+  "domainAgeDays": 120,
+  "certificate": { "valid": true, "daysToExpiry": 11, "selfSigned": false, "issuer": "Let's Encrypt" },
+  "securityHeaders": { "grade": "D", "missing": ["content-security-policy", "strict-transport-security"] },
+  "cookies": { "total": 6, "missingSecure": 3, "missingHttpOnly": 4 },
+  "reports": { "count": 2 }
+}

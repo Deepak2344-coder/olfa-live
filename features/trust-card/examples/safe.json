@@ -1,0 +1,9 @@
+{
+  "domain": "wikipedia.org",
+  "riskScore": 0.04,
+  "domainAgeDays": 9500,
+  "certificate": { "valid": true, "daysToExpiry": 210, "selfSigned": false, "issuer": "GlobalSign" },
+  "securityHeaders": { "grade": "A", "missing": [] },
+  "cookies": { "total": 3, "missingSecure": 0, "missingHttpOnly": 0 },
+  "reports": { "count": 0 }
+}

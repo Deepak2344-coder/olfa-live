@@ -1,0 +1,37 @@
+/* Olfa warning banner, injected by content/banner.js only on pages the
+   background flagged as dangerous. Light, friendly, with Hachi. */
+#olfa-banner {
+  position: sticky;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2147483646;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #FFE1DC;
+  color: #5A2F14;
+  font: 13px/1.4 ui-rounded, "Nunito", "Segoe UI", system-ui, sans-serif;
+  border-bottom: 3px solid #E0584C;
+  box-shadow: 0 6px 18px rgba(224, 88, 76, 0.28);
+}
+#olfa-banner-face { width: 40px; height: 40px; border-radius: 12px; background: #fff; border: 2px solid #FFD9B0; padding: 2px; flex-shrink: 0; }
+#olfa-banner strong { font-weight: 900; color: #B23A30; }
+#olfa-banner ul { margin: 2px 0 0; padding: 0; list-style: none; color: #8A5A34; }
+#olfa-banner li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+#olfa-banner-dismiss {
+  margin-left: auto;
+  background: #FFB45F;
+  color: #5A2A0C;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-weight: 800;
+  box-shadow: 0 3px 0 #F0993F;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#olfa-banner-dismiss:hover { background: #FFBE75; }

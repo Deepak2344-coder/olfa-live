@@ -1,0 +1,13 @@
+{
+  "name": "olfa-trust-card",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "Olfa trust-card — domain trustworthiness letter grade",
+  "main": "lib/grade.js",
+  "scripts": {
+    "test": "node tests/grade.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

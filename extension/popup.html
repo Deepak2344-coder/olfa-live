@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Olfa Trust Shield</title>
+  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="popup-theme.css" />
+</head>
+<body>
+  <!-- Header with Brand & Quick Actions -->
+  <header>
+    <div class="brand">
+      <img src="logo_48.png" alt="Olfa" class="hachi-avatar" />
+      <div class="brand-text">
+        <span class="logo">Olfa <span class="accent">Shield</span></span>
+        <span class="tagline">AI Digital Trust &amp; Phishing Defense</span>
+      </div>
+    </div>
+    <div class="header-controls">
+      <select id="lang-select" aria-label="Select Language" title="Language">
+        <option value="en">EN</option>
+        <option value="hi">हिन्दी</option>
+        <option value="bn">বাংলা</option>
+      </select>
+      <button id="rescan-btn" class="icon-btn" title="Re-scan this page">↻</button>
+      <a href="options.html" target="_blank" class="icon-btn" title="Settings">⚙</a>
+    </div>
+  </header>
+
+  <!-- Mascot: Hachi reacts to the page verdict -->
+  <section class="hero" id="hero" data-mood="scanning" aria-live="polite">
+      <button id="open-site-btn" class="site-btn" type="button" title="Open the full Olfa website">🌐 Website</button>
+    <hachi-dog id="mascot" state="scanning" style="--hachi-size:116px"></hachi-dog>
+    <div class="bubble"><b id="bubble-title">Sniffing this page…</b><span id="bubble-sub">Hold on, checking links, certificate and page behaviour.</span></div>
+  </section>
+
+  <!-- Current Target Domain Banner -->
+  <div class="target-bar">
+    <span class="target-host" id="active-host">Loading site…</span>
+    <span class="shield-badge badge-neutral" id="overall-badge">Checking</span>
+  </div>
+
+  <!-- Tab Navigation -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="tab-overview">Overview</button>
+    <button class="nav-tab" data-tab="tab-threats">In-Page Threats</button>
+    <button class="nav-tab" data-tab="tab-links">Links &amp; QR</button>
+    <button class="nav-tab" data-tab="tab-scam">Message Check</button>
+    <button class="nav-tab" data-tab="tab-report">Report</button>
+  </nav>
+
+  <!-- TAB 1: OVERVIEW & TRUST CARD -->
+  <section id="tab-overview" class="tab-panel active">
+    <!-- Big Score / Grade Card -->
+    <div class="card score-card">
+      <div class="grade-ring" id="grade-ring">
+        <span class="grade-letter" id="grade-letter">-</span>
+        <span class="grade-sub" id="grade-score">--/100</span>
+      </div>
+      <div class="score-details">
+        <div class="verdict-title" id="verdict-title">Analyzing Telemetry…</div>
+        <div class="verdict-desc" id="verdict-desc">Hachi is inspecting security headers, link patterns, and certificates.</div>
+        <div class="meta-row">
+          <span class="chip" id="domain-age-chip">Domain Age: Checking…</span>
+          <span class="chip" id="ads-blocked-chip">🛡 Pop-up Blocker: Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Pillars Breakdown -->
+    <div class="pillars-grid">
+      <div class="pillar-card" id="pillar-ml">
+        <div class="pillar-icon">🧠</div>
+        <div class="pillar-label">Link Pattern (ML)</div>
+        <div class="pillar-status" id="pillar-ml-status">Safe</div>
+      </div>
+      <div class="pillar-card" id="pillar-sec">
+        <div class="pillar-icon">🔒</div>
+        <div class="pillar-label">Page Security</div>
+        <div class="pillar-status" id="pillar-sec-status">Grade -</div>
+      </div>
+      <div class="pillar-card" id="pillar-cert">
+        <div class="pillar-icon">📜</div>
+        <div class="pillar-label">TLS Certificate</div>
+        <div class="pillar-status" id="pillar-cert-status">Trusted</div>
+      </div>
+      <div class="pillar-card" id="pillar-intel">
+        <div class="pillar-icon">👥</div>
+        <div class="pillar-label">Community Intel</div>
+        <div class="pillar-status" id="pillar-intel-status">0 reports</div>
+      </div>
+    </div>
+
+    <!-- TLS Certificate Chain Hierarchy -->
+    <div class="card cert-card" id="cert-chain-box">
+      <div class="card-header">
+        <h4>Certificate Chain</h4>
+        <span class="cert-connection" id="cert-cipher">TLSv1.3</span>
+      </div>
+      <div class="cert-chain-flow" id="cert-chain-flow">
+        <div class="cert-node node-leaf" id="cert-leaf">Destination Host</div>
+        <div class="cert-arrow">↓</div>
+        <div class="cert-node node-inter" id="cert-inter">Intermediate CA</div>
+        <div class="cert-arrow">↓</div>
+        <div class="cert-node node-root" id="cert-root">Trusted Root CA</div>
+      </div>
+    </div>
+
+    <!-- Primary Reasons / Highlights -->
+    <div class="reasons-box">
+      <h4>Telemetry Findings</h4>
+      <ul id="findings-list" class="findings-list">
+        <li>Evaluating security signals…</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- TAB 2: IN-PAGE THREATS & PRIVACY -->
+  <section id="tab-threats" class="tab-panel">
+    <div class="card">
+      <h4>Active DOM Threats</h4>
+      <p class="section-desc">Clickjacking traps, obfuscated scripts, and overlay hijacking.</p>
+      <div id="dom-threats-list" class="threat-list">
+        <div class="threat-empty">No active DOM hijack threats detected.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>Privacy &amp; Data Sharing</h4>
+      <div class="facts-grid">
+        <div class="fact-item">
+          <span class="fact-num" id="fact-trackers">0</span>
+          <span class="fact-lbl">Tracker Hosts</span>
+        </div>
+        <div class="fact-item">
+          <span class="fact-num" id="fact-cookies">0</span>
+          <span class="fact-lbl">Insecure Cookies</span>
+        </div>
+        <div class="fact-item">
+          <span class="fact-num" id="fact-forms">0</span>
+          <span class="fact-lbl">Cross-Origin Forms</span>
+        </div>
+        <div class="fact-item">
+          <span class="fact-num" id="fact-fps">0</span>
+          <span class="fact-lbl">Fingerprint APIs</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: LINKS & QR CODE QUISHING SCANNER -->
+  <section id="tab-links" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <h4>Page Links &amp; Decoded QR</h4>
+        <button id="toggle-highlight-btn" class="small-btn">Highlight on Page</button>
+      </div>
+      <div class="links-summary-bar" id="links-summary-bar">
+        <span>0 links analyzed</span>
+      </div>
+      <div class="links-scroll-list" id="links-list">
+        <div class="threat-empty">No external links or QR codes found on this page.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: SCAM MESSAGE CHECKER -->
+  <section id="tab-scam" class="tab-panel">
+    <div class="card">
+      <h4>Check Suspicious Message</h4>
+      <p class="section-desc">Paste an SMS, WhatsApp, or email message. Analysis runs strictly offline.</p>
+      <div class="msg-lang-row">
+        <label for="msg-lang-select">Message Language:</label>
+        <select id="msg-lang-select">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="bn">বাংলা (Bengali)</option>
+        </select>
+      </div>
+      <textarea id="msg-input" rows="4" placeholder="e.g., Dear Customer, your electricity will be disconnected tonight at 9:30 PM. Call this number immediately to pay your bill..."></textarea>
+      <div class="msg-actions">
+        <button id="msg-scan-btn" class="primary-btn">Analyze Message</button>
+      </div>
+      <div id="msg-results" class="msg-results-card" hidden>
+        <div class="msg-verdict" id="msg-verdict-banner"></div>
+        <div class="msg-highlighted" id="msg-highlighted-text"></div>
+        <ul class="msg-rules-hit" id="msg-rules-list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 5: COMMUNITY INTEL & REPORT -->
+  <section id="tab-report" class="tab-panel">
+    <div class="card">
+      <h4>Submit Threat Telemetry</h4>
+      <p class="section-desc">Help protect the community. Reports update Olfa's shared threat intelligence feed.</p>
+      <div class="report-options">
+        <button class="report-btn btn-danger" data-verdict="phishing">🚨 Report as Phishing</button>
+        <button class="report-btn btn-warning" data-verdict="scam">⚠️ Report as Scam / Fraud</button>
+        <button class="report-btn btn-safe" data-verdict="safe">✅ Confirm Site is Safe</button>
+      </div>
+      <div class="report-note-box">
+        <label for="report-note">Optional Notes:</label>
+        <input type="text" id="report-note" placeholder="What suspicious behavior did you observe?" maxlength="200" />
+      </div>
+      <div id="report-feedback" class="report-feedback" hidden></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Protected by <strong>Olfa Core</strong> &bull; Hachi Shield</span>
+    <span id="backend-status-dot" class="dot-green" title="Checking backend…">● Live</span>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
+

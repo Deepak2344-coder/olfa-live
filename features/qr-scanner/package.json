@@ -1,0 +1,12 @@
+{
+  "name": "olfa-qr-scanner",
+  "version": "1.0.0",
+  "description": "Olfa QR scanner — client-side QR decoding and quishing checks",
+  "main": "lib/parse.js",
+  "scripts": {
+    "test": "echo \"No unit tests for QR scanner (jsQR is vendored); demo tested manually.\""
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

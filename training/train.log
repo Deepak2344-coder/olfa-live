@@ -1,0 +1,18 @@
+[     1s] tranco 1000000
+[     7s] new phishing hosts 200000; phishing URLs on top-1M domains (excluded, ambiguous): 227869/633418
+[     8s] urlset.csv hosts: {1: 20506, 0: 21843}
+[     9s] {('new_phish', 1): 200000, ('old_legit', 0): 21843, ('old_phish', 1): 20506, ('tranco', 0): 259226}
+[    10s] train 400977 test 100598 phish share 0.44
+[    54s] lr fold 0
+[    98s] lr fold 1
+[   138s] lr fold 2
+[   180s] lr fold 3
+[   240s] lr-only test AUC 0.9034
+[   251s] features done
+[   261s] xgb-stack test AUC 0.90954
+[   261s] thr 0.50: false-alarm all 0.1063 | small old sites 0.2208 | tranco 0.0958 | catches new phish 0.7590 | old phish 0.5602
+[   261s] thr 0.80: false-alarm all 0.0187 | small old sites 0.0824 | tranco 0.0128 | catches new phish 0.5758 | old phish 0.3446
+[   261s] thr 0.90: false-alarm all 0.0072 | small old sites 0.0382 | tranco 0.0044 | catches new phish 0.5080 | old phish 0.2912
+[   261s] thr 0.95: false-alarm all 0.0025 | small old sites 0.0140 | tranco 0.0015 | catches new phish 0.4583 | old phish 0.2579
+[   261s] thr 0.99: false-alarm all 0.0003 | small old sites 0.0002 | tranco 0.0003 | catches new phish 0.3616 | old phish 0.2117
+[   265s] saved

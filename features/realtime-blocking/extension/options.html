@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Olfa settings &amp; log</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0; padding: 24px; max-width: 860px;
+        font: 14px/1.5 system-ui, sans-serif; background: #12161f; color: #e9e5df;
+      }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #9a938a; margin: 28px 0 10px; }
+      .row { background: #1b2230; border: 1px solid #273041; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+      label { display: flex; gap: 10px; align-items: center; }
+      input[type="url"], input[type="text"] {
+        width: 100%; margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+        border: 1px solid #334055; background: #0e131b; color: #e9e5df; font: inherit;
+      }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #273041; vertical-align: top; }
+      th { color: #9a938a; font-weight: 600; }
+      .kind { font-size: 11px; padding: 1px 7px; border-radius: 999px; text-transform: uppercase; letter-spacing: .05em; }
+      .kind.blocked { background: #3b1d22; color: #ff9b9b; }
+      .kind.closed { background: #3b2a1d; color: #ffc48a; }
+      .kind.warned { background: #2f3547; color: #b9c6ff; }
+      button {
+        font: inherit; font-size: 12px; padding: 5px 10px; margin-right: 6px;
+        border-radius: 8px; border: 1px solid #334055; background: #222b3b; color: #e9e5df; cursor: pointer;
+      }
+      .muted { color: #8c857c; font-size: 12px; }
+      ul.trusted { list-style: none; padding: 0; margin: 8px 0 0; }
+      ul.trusted li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #273041; }
+      #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #22303f; padding: 8px 14px; border-radius: 10px; opacity: 0; transition: opacity .2s; }
+      #toast.show { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <h1>Olfa</h1>
+    <p class="muted">Realtime blocking — settings and activity log.</p>
+
+    <h2>Settings</h2>
+    <div class="row">
+      <label><input type="checkbox" id="autoClose" /> Close risky tabs that opened themselves</label>
+      <p class="muted">Only tabs opened by a page without a click are closed, never tabs you opened. You can undo from the notification.</p>
+    </div>
+    <div class="row">
+      <label for="backendUrl">Scan endpoint (optional)</label>
+      <input type="url" id="backendUrl" placeholder="http://127.0.0.1:8790/scan" />
+      <p class="muted">Used only when the local check is inconclusive. Leave empty to stay fully offline.</p>
+    </div>
+
+    <h2>Trusted sites</h2>
+    <div class="row">
+      <p class="muted">Hosts here are never blocked or warned about.</p>
+      <ul class="trusted" id="trusted"></ul>
+      <div style="margin-top:10px">
+        <input type="text" id="trustInput" placeholder="example.com" />
+        <div style="margin-top:8px"><button id="addTrust">Add trusted host</button></div>
+      </div>
+    </div>
+
+    <h2>Activity log</h2>
+    <div class="row">
+      <table>
+        <thead><tr><th>When</th><th>What</th><th>URL</th><th>Score</th><th></th></tr></thead>
+        <tbody id="logRows"></tbody>
+      </table>
+      <p class="muted" id="emptyLog">Nothing logged yet. Try the demo pages.</p>
+      <div style="margin-top:10px"><button id="clearLog">Clear log</button></div>
+    </div>
+
+    <div id="toast"></div>
+    <script src="options.js"></script>
+  </body>
+</html>

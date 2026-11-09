@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Olfa — Redirect Tracer</title>
+    <style>
+      :root { color-scheme: light dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; padding: 40px 20px 80px; font: 16px/1.55 system-ui, sans-serif;
+        background: #0f131b; color: #ece7df; display: grid; place-items: start center;
+      }
+      .wrap { width: min(820px, 100%); }
+      header { display: flex; gap: 14px; align-items: center; margin-bottom: 22px; }
+      header img { width: 56px; height: 56px; }
+      h1 { margin: 0; font-size: 24px; letter-spacing: -.02em; }
+      .sub { margin: 2px 0 0; color: #9aa0a8; font-size: 13px; }
+      form { display: flex; gap: 8px; margin-bottom: 26px; }
+      input[type="url"] {
+        flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid #2c3648;
+        background: #161d28; color: inherit; font: inherit;
+      }
+      button {
+        padding: 12px 18px; border-radius: 10px; border: 1px solid #f0b429;
+        background: #f0b429; color: #23201c; font: inherit; font-weight: 600; cursor: pointer;
+      }
+      button:disabled { opacity: .55; cursor: progress; }
+      .summary {
+        border: 1px solid #2c3648; border-radius: 14px; padding: 16px 18px; margin-bottom: 22px;
+        background: #161d28;
+      }
+      .summary h2 { margin: 0 0 6px; font-size: 15px; }
+      .pill { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+              padding: 2px 8px; border-radius: 999px; margin: 0 6px 6px 0; }
+      .pill.safe { background: #17352a; color: #86d6ab; }
+      .pill.suspicious { background: #3a2f14; color: #ffc48a; }
+      .pill.dangerous { background: #3b1d22; color: #ff9b9b; }
+      .pill.flag { background: #232c3b; color: #b9c6ff; }
+      .final { margin-top: 8px; font: 13px ui-monospace, Consolas, monospace; word-break: break-all; color: #b9c1cc; }
+      ol.timeline { list-style: none; margin: 0; padding: 0 0 0 26px; position: relative; }
+      ol.timeline::before {
+        content: ""; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px;
+        background: linear-gradient(#f0b429, #2c3648);
+      }
+      li.hop { position: relative; padding: 12px 0 12px 8px; }
+      li.hop::before {
+        content: ""; position: absolute; left: -24px; top: 20px; width: 12px; height: 12px;
+        border-radius: 50%; background: #2c3648; border: 2px solid #0f131b;
+      }
+      li.hop.risky::before { background: #d8483f; }
+      li.hop.ok::before { background: #35a06a; }
+      .hop-url { font: 13px/1.5 ui-monospace, Consolas, monospace; word-break: break-all; color: #dfe5ee; }
+      .meta { font-size: 12px; color: #9aa0a8; margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap; }
+      .badge { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: #232c3b; color: #b9c6ff; }
+      .badge.red { background: #3b1d22; color: #ff9b9b; }
+      .badge.amber { background: #3a2f14; color: #ffc48a; }
+      .error { color: #ff9b9b; font-size: 13px; margin-top: 4px; }
+      .empty { color: #9aa0a8; font-size: 14px; }
+      .hint { margin-top: 30px; font-size: 12px; color: #7c838d; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <img src="/static/hachi.png" alt="Hachi" />
+        <div>
+          <h1>Redirect Tracer</h1>
+          <p class="sub">See where a link really goes before you trust it. Hachi follows the chain so you do not have to.</p>
+        </div>
+      </header>
+
+      <form id="trace-form">
+        <input type="url" id="url" placeholder="https://bit.ly/example" required
+               value="https://github.com/Deepak2344-coder/Olfa" />
+        <button type="submit" id="go">Trace</button>
+      </form>
+
+      <div id="summary"></div>
+      <ol class="timeline" id="timeline"></ol>
+      <p class="hint">Private and local addresses are refused, so this page cannot be used to probe your network.
+        Markup redirects (meta refresh, literal <code>location =</code>) are read as text — page JavaScript is never executed.</p>
+    </div>
+
+    <script>
+      const form = document.getElementById('trace-form');
+      const summary = document.getElementById('summary');
+      const timeline = document.getElementById('timeline');
+      const go = document.getElementById('go');
+
+      function hostOf(url) {
+        try { return new URL(url).hostname; } catch (e) { return ''; }
+      }
+
+      function render(data) {
+        const score = typeof data.score === 'number' ? data.score : 0;
+        const level = data.level || 'safe';
+        summary.innerHTML = '';
+
+        const box = document.createElement('div');
+        box.className = 'summary';
+
+        const title = document.createElement('h2');
+        title.textContent = 'Risk ' + Math.round(score * 100) + '% — ' + level;
+        box.appendChild(title);
+
+        const lvl = document.createElement('span');
+        lvl.className = 'pill ' + level;
+        lvl.textContent = level;
+        box.appendChild(lvl);
+
+        (data.flags || []).forEach((flag) => {
+          const pill = document.createElement('span');
+          pill.className = 'pill flag';
+          pill.textContent = flag.replace(/_/g, ' ');
+          box.appendChild(pill);
+        });
+
+        (data.reasons || []).forEach((reason) => {
+          const p = document.createElement('p');
+          p.style.margin = '6px 0 0';
+          p.style.fontSize = '13px';
+          p.textContent = reason.message;
+          box.appendChild(p);
+        });
+
+        const final = document.createElement('p');
+        final.className = 'final';
+        final.textContent = 'final: ' + (data.final_url || data.url);
+        box.appendChild(final);
+
+        summary.appendChild(box);
+
+        timeline.innerHTML = '';
+        (data.hops || []).forEach((hop, index) => {
+          const li = document.createElement('li');
+          li.className = 'hop ' + (hop.error ? 'risky' : index === data.hops.length - 1 ? 'ok' : '');
+
+          const url = document.createElement('div');
+          url.className = 'hop-url';
+          url.textContent = (index + 1) + '. ' + hop.url;
+          li.appendChild(url);
+
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+
+          const add = (text, cls) => {
+            const span = document.createElement('span');
+            if (cls) span.className = cls;
+            span.textContent = text;
+            meta.appendChild(span);
+          };
+
+          add(hop.kind || 'http');
+          if (hop.status) add('HTTP ' + hop.status);
+          add(hop.domain || hostOf(hop.url));
+          add(hop.elapsed_ms + ' ms');
+          if (hop.shortener) add('shortener', 'badge amber');
+          if (hop.domain_changed) add('new domain', 'badge');
+          li.appendChild(meta);
+
+          if (hop.error) {
+            const err = document.createElement('div');
+            err.className = 'error';
+            err.textContent = hop.error;
+            li.appendChild(err);
+          }
+          timeline.appendChild(li);
+        });
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const url = document.getElementById('url').value.trim();
+        if (!url) return;
+        go.disabled = true;
+        go.textContent = 'Tracing…';
+        summary.innerHTML = '';
+        timeline.innerHTML = '';
+        try {
+          const response = await fetch('/trace', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ url }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.detail || 'trace failed');
+          render(data);
+        } catch (error) {
+          summary.innerHTML = '<div class="summary"><h2>Could not trace</h2><p class="error">' + error.message + '</p></div>';
+        } finally {
+          go.disabled = false;
+          go.textContent = 'Trace';
+        }
+      });
+    </script>
+  </body>
+</html>

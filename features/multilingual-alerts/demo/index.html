@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olfa multilingual alerts demo</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #fafafa; color: #111; }
+    .demo { max-width: 800px; margin: 2rem auto; padding: 1rem; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fff; }
+    select, button { padding: 0.5rem 1rem; font-size: 1rem; }
+    .alert { margin: 1rem 0; padding: 0.5rem; background: #fff3f3; border-left: 4px solid #e25555; }
+  </style>
+</head>
+<body>
+  <div class="demo">
+    <h2>Olfa multilingual alerts</h2>
+    <p>Select a reason code and language to display the localized warning.</p>
+
+    <div class="card">
+      <label for="reasonSelect">Reason code:</label>
+      <select id="reasonSelect">
+        <option value="PHISH_URL">PHISH_URL</option>
+        <option value="TYPOSQUAT">TYPOSQUAT</option>
+        <option value="URGENT_POPUP">URGENT_POPUP</option>
+        <option value="INVALID_CERT">INVALID_CERT</option>
+        <option value="COOKIE_TRACK">COOKIE_TRACK</option>
+      </select>
+      <br>
+      <label for="langSelect">Language:</label>
+      <select id="langSelect">
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="bn">Bangla</option>
+      </select>
+    </div>
+
+    <div id="alertBox" class="alert" style="display:none;"></div>
+  </div>
+
+  <script type="module">
+    import { getAlert, listReasons } from './lib/alerts.js';
+
+    const reasonSelect = document.getElementById('reasonSelect');
+    const langSelect = document.getElementById('langSelect');
+    const alertBox = document.getElementById('alertBox');
+
+    function updateAlert() {
+      const reason = reasonSelect.value;
+      const language = langSelect.value;
+      const text = getAlert(reason, language);
+      alertBox.textContent = text;
+      alertBox.style.display = 'block';
+    }
+
+    // Pre‑populate the “Reason code” options with all codes from English catalog
+    const enCodes = listReasons('en');
+    enCodes.forEach(code => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = code;
+      reasonSelect.appendChild(opt);
+    });
+
+    // Initial selection
+    reasonSelect.selectedIndex = 0;
+    langSelect.selectedIndex = 0;
+    updateAlert();
+
+    // Re‑render on change
+    reasonSelect.addEventListener('change', updateAlert);
+    langSelect.addEventListener('change', updateAlert);
+  </script>
+</body>
+</html>

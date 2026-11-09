@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF4E6">
+<title>Olfa: your trustworthy companion</title>
+<style>
+:root{
+  --chalk:#0F161D;--panel:#17212B;--panel-card:#1C2936;--ink:#E8EDF1;--steel:#9AA8B5;--line:#2B3946;
+  --safe:#4FC08D;--warn:#E0A93F;--bad:#F0776E;--gray:#6F7D8A;--focus:#8AB0FF;--accent:#38BDF8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--chalk);color:var(--ink);font:15px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:960px;margin:0 auto;padding:24px 20px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.brand h1{font-size:1.25rem;margin:0;letter-spacing:.01em}
+.brand p{margin:0;color:var(--steel);font-size:.86rem}
+.header-actions{display:flex;align-items:center;gap:12px}
+select,input,button{font:inherit;color:inherit}
+select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:.88rem}
+
+/* Navigation Tabs */
+.tabs-nav{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto}
+.tab-btn{background:none;border:none;color:var(--steel);padding:10px 18px;font-weight:600;font-size:.95rem;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s}
+.tab-btn:hover{color:var(--ink);background:rgba(255,255,255,.03)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+
+/* Section visibility */
+.view-section{display:none}
+.view-section.active{display:block}
+
+/* Scanner styles */
+h2.lead{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.2;margin:0 0 16px;font-weight:700}
+form.scan-form{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text]{flex:1 1 320px;min-width:0;padding:14px 16px;font-size:1.02rem;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink)}
+input[type=text]:focus{outline:2px solid var(--accent);border-color:transparent}
+button{cursor:pointer;border:0;border-radius:8px;padding:14px 22px;background:var(--ink);color:var(--chalk);font-weight:600;transition:opacity .15s}
+button:hover{opacity:.9}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 14px;font-weight:500}
+button.ghost:hover{background:rgba(255,255,255,.05)}
+button.danger-ghost{background:transparent;color:var(--bad);border:1px solid rgba(240,119,110,.3);padding:6px 14px;font-size:.85rem}
+button.danger-ghost:hover{background:rgba(240,119,110,.1)}
+button:disabled{opacity:.5;cursor:progress}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+label.quick{display:flex;gap:8px;align-items:center;color:var(--steel);font-size:.88rem;margin-top:10px;cursor:pointer}
+
+#out{margin-top:28px}
+.verdict{border-left:8px solid var(--c,var(--gray));padding:4px 0 4px 18px;margin-bottom:20px}
+.verdict h3{margin:0;font-size:clamp(1.4rem,3.8vw,1.9rem);line-height:1.2;color:var(--c)}
+.verdict p{margin:6px 0 0;color:var(--steel);word-break:break-all}
+.lanes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);margin-bottom:24px}
+.lane{padding:14px 16px;border-right:1px solid var(--line);border-top:5px solid var(--c,var(--gray))}
+.lane:last-child{border-right:0}
+.lane b{display:block;font-size:.92rem}
+.lane span{font-size:.85rem;color:var(--steel)}
+.lane .st{color:var(--c);font-weight:600}
+section.block{margin-bottom:24px}
+section.block h4{margin:0 0 10px;font-size:1.02rem;color:var(--ink)}
+ul.reasons{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+ul.reasons li{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:10px 14px;font-size:.92rem}
+ul.reasons small{color:var(--steel);display:block;margin-top:2px}
+.checks{display:grid;gap:6px}
+.check{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:8px 12px}
+.check .name{font-weight:600;font-size:.9rem}
+.check .chip{font-size:.76rem;font-weight:600;border-radius:999px;padding:2px 10px;border:1px solid var(--c);color:var(--c);white-space:nowrap}
+.check .detail{flex-basis:100%;font-size:.82rem;color:var(--steel)}
+.hop{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:6px 0;border-bottom:1px dashed var(--line);word-break:break-all}
+.hop .k{color:var(--steel);font-size:.85rem}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:0;font-size:.92rem}
+dt{color:var(--steel)}dd{margin:0;word-break:break-word}
+.chain{display:grid;gap:6px}
+.chain div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-left:calc(var(--i)*14px);font-size:.88rem}
+.report{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msg{color:var(--steel);margin:8px 0 0;font-size:.9rem}
+.err{color:var(--bad)}
+.note{font-size:.85rem;color:var(--steel);max-width:65ch;line-height:1.5}
+
+/* AI Scan Summary Card */
+.ai-summary-card{
+  background:linear-gradient(135deg,rgba(56,189,248,0.08) 0%,rgba(23,33,43,0.95) 100%);
+  border:1px solid rgba(56,189,248,0.35);
+  border-radius:12px;
+  padding:18px 20px;
+  margin-bottom:24px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  transition:border-color .2s;
+}
+.ai-summary-card:hover{border-color:var(--accent)}
+.ai-summary-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ai-summary-branding{display:flex;align-items:center;gap:12px}
+.ai-summary-mascot{font-size:1.8rem;line-height:1}
+.ai-summary-badge{font-size:0.75rem;padding:3px 8px;border-radius:4px;background:rgba(56,189,248,0.15);color:var(--accent);font-weight:600}
+.ai-summary-body{font-size:0.95rem;line-height:1.6;color:var(--ink);margin-bottom:12px;white-space:pre-wrap}
+.ai-loading-pulse{color:var(--steel);font-style:italic;display:flex;align-items:center;gap:8px;animation:pulse 1.5s infinite ease-in-out}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.ai-summary-footer{display:flex;justify-content:flex-end;border-top:1px solid rgba(255,255,255,.06);padding-top:10px}
+
+/* Chat Tab Styles */
+.chat-container{display:flex;flex-direction:column;height:650px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.chat-header{padding:14px 18px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.chat-header-title{font-weight:700;display:flex;align-items:center;gap:10px}
+.chat-status-pill{display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--steel)}
+.chat-status-dot{width:8px;height:8px;border-radius:50%;background:var(--safe);box-shadow:0 0 6px var(--safe)}
+.chat-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.chat-msg{max-width:85%;padding:11px 16px;border-radius:10px;font-size:.92rem;line-height:1.5;word-break:break-word;white-space:pre-wrap}
+.chat-msg.user{align-self:flex-end;background:var(--accent);color:#082f49;border-bottom-right-radius:2px;font-weight:500}
+.chat-msg.assistant{align-self:flex-start;background:var(--panel-card);border:1px solid var(--line);border-bottom-left-radius:2px}
+.chat-msg.sys{align-self:center;background:none;color:var(--steel);font-size:.82rem;text-align:center;padding:4px}
+.chat-input-bar{display:flex;gap:8px;padding:14px 18px;border-top:1px solid var(--line);background:rgba(255,255,255,.02)}
+.chat-input-bar input{flex:1;padding:12px 14px;background:var(--chalk);border:1px solid var(--line);border-radius:8px;color:var(--ink)}
+
+/* History Tab Styles */
+.history-controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.history-list{display:grid;gap:10px}
+.history-item{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;transition:border-color .15s}
+.history-item:hover{border-color:var(--steel)}
+.history-summary{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:12px}
+.history-url{font-family:ui-monospace,monospace;font-size:.9rem;word-break:break-all}
+.history-meta{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.history-pill{font-size:.76rem;font-weight:700;border-radius:999px;padding:2px 10px;text-transform:uppercase}
+.history-pill.safe{background:rgba(79,192,141,.15);color:var(--safe)}
+.history-pill.suspicious{background:rgba(224,169,63,.15);color:var(--warn)}
+.history-pill.dangerous{background:rgba(240,119,110,.15);color:var(--bad)}
+.history-details{display:none;padding:14px 18px;border-top:1px solid var(--line);background:rgba(0,0,0,.15);font-size:.88rem}
+.history-item.open .history-details{display:block}
+
+/* Community Tab Styles */
+.community-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px}
+.community-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.community-card h3{margin:0 0 12px;font-size:1.05rem}
+.report-box{background:linear-gradient(135deg,rgba(56,189,248,0.06) 0%,rgba(23,33,43,0.95) 100%);border:1px solid rgba(56,189,248,0.3);border-radius:12px;padding:18px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
+.feed-item{padding:10px 0;border-bottom:1px solid var(--line);font-size:.88rem;display:flex;flex-direction:column;gap:5px}
+.feed-item:last-child{border-bottom:none}
+.badge-verdict{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase}
+.badge-verdict.safe{background:rgba(79,192,141,.18);color:var(--safe)}
+.badge-verdict.phishing{background:rgba(240,119,110,.18);color:var(--bad)}
+.badge-verdict.malware,.badge-verdict.malicious{background:rgba(217,70,239,.18);color:#d946ef}
+.badge-verdict.scam,.badge-verdict.suspicious{background:rgba(224,169,63,.18);color:var(--warn)}
+
+@media (prefers-reduced-motion:no-preference){.verdict{animation:in .25s ease-out}@keyframes in{from{opacity:.2}to{opacity:1}}}
+</style>
+<link rel="stylesheet" href="/static/olfa-theme.css">
+<link rel="stylesheet" href="/static/olfa-pages.css">
+<link rel="stylesheet" href="/static/olfa-modes.css">
+<script src="/static/olfa-modes.js"></script>
+<link rel="icon" href="/static/olfa-logo.png">
+<script type="module" src="/static/hachi-dog.js"></script>
+</head>
+<body>
+<main>
+<header>
+  <div class="brand">
+    <img src="/static/olfa-logo.png" alt="Olfa">
+    <div>
+      <h1>Olfa: <span style="font-weight:600">your trustworthy companion</span></h1>
+      <p>Hachi checks links so you don't have to guess.</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button id="themeBtn" class="theme-btn" type="button" aria-label="Toggle dark mode"><span class="moon">🌙</span><span class="sun">☀️</span></button>
+    <select id="lang" aria-label="Language">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+      <option value="bn">বাংলা</option>
+    </select>
+  </div>
+</header>
+
+<!-- Navigation Tabs -->
+<nav class="tabs-nav" aria-label="Main Navigation">
+  <button class="tab-btn active" data-tab="scanner">🔍 Scanner</button>
+  <button class="tab-btn" data-tab="chat">💬 AI Chat</button>
+  <button class="tab-btn" data-tab="history">📜 History <span id="histCount"></span></button>
+  <button class="tab-btn" data-tab="community">🌐 Community</button>
+  <button class="tab-btn" data-tab="extension">🧩 Get Extension</button>
+  <button class="tab-btn" data-tab="about">ℹ️ About</button>
+</nav>
+
+<!-- TAB 1: SCANNER -->
+<section id="tab-scanner" class="view-section active">
+  <div class="hero-card" id="heroCard" data-mood="idle" aria-live="polite">
+    <hachi-dog id="heroDog" state="idle" style="--hachi-size:210px"></hachi-dog>
+    <div class="bubble"><b id="heroTitle">Paste a link, I'll sniff it out.</b><span id="heroSub">I check the link, the page, the certificate and community reports.</span></div>
+  </div>
+  <h2 class="lead" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Paste a link. See if it is safe to open.</h2>
+  <form id="f" class="scan-form">
+    <input id="u" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/login" aria-label="Link to check" required>
+    <button id="go" type="submit">Check link</button>
+  </form>
+  <label class="quick"><input id="quick" type="checkbox"> Quick check only (skips visiting the page)</label>
+  <div id="out" aria-live="polite"></div>
+</section>
+
+<!-- TAB 2: AI CHAT -->
+<section id="tab-chat" class="view-section">
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat-header-title">
+        <hachi-dog id="chatDog" state="idle" style="--hachi-size:64px"></hachi-dog><span>Hachi Security Assistant</span>
+        <span style="font-size:0.75rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.08);color:var(--steel)">Gemini 2.5 Flash</span>
+      </div>
+      <div class="chat-status-pill">
+        <span class="chat-status-dot"></span>
+        <span>AI Connected & Rate-Protected</span>
+      </div>
+    </div>
+    <div id="chatMessages" class="chat-messages">
+      <div class="chat-msg sys">Hello! I am Hachi, your cybersecurity assistant. Ask me questions about phishing signs, suspicious links, SSL certificates, or your recent scan results!</div>
+    </div>
+    <form id="chatForm" class="chat-input-bar">
+      <input id="chatInput" type="text" placeholder="Ask about the scan, a URL, or phishing risks…" autocomplete="off" required>
+      <button type="submit" id="chatSendBtn" style="padding:10px 18px">Send</button>
+    </form>
+  </div>
+</section>
+
+<!-- TAB 3: HISTORY -->
+<section id="tab-history" class="view-section">
+  <div class="history-controls">
+    <div>
+      <h3 style="margin:0 0 4px">Past Scan Records</h3>
+      <p style="margin:0;color:var(--steel);font-size:0.85rem">Click any scan record to view its full report breakdown.</p>
+    </div>
+    <button id="clearHistBtn" class="danger-ghost" type="button">🗑️ Clear History</button>
+  </div>
+  <div id="historyList" class="history-list"></div>
+</section>
+
+<!-- TAB 4: COMMUNITY -->
+<!-- TAB 5: GET EXTENSION -->
+<section id="tab-extension" class="view-section">
+  <div class="pg-hero">
+    <hachi-dog state="safe"></hachi-dog>
+    <div>
+      <h2>Take Hachi with you</h2>
+      <p>The Olfa browser extension checks every page you open and every link you hover, and stops you before you hand a password to a fake site.</p>
+      <a id="extBtn" class="pg-btn" href="/download/olfa-extension.zip" download>⬇️ Download extension</a><span id="extMeta" class="pg-meta"></span>
+    </div>
+  </div>
+
+  <h3 class="pg-h">Install in 4 steps</h3>
+  <ol class="pg-steps">
+    <li>Download the zip above and <b>unzip it</b>. You get a folder called <code>olfa-extension</code>. Keep it somewhere permanent, because Chrome reads it from there.</li>
+    <li>In Chrome, Edge or Brave open the address <code>chrome://extensions</code> <button class="pg-copy" data-copy="chrome://extensions" type="button">Copy</button> and switch on <b>Developer mode</b> (top right).</li>
+    <li>Click <b>Load unpacked</b> and choose the unzipped <code>olfa-extension</code> folder.</li>
+    <li>Pin Olfa from the puzzle-piece menu. Open any website: Hachi appears in the corner and the toolbar icon shows the safety score.</li>
+  </ol>
+
+  <h3 class="pg-h">What you get</h3>
+  <div class="pg-grid">
+    <div class="pg-card mint"><span class="ic">🛡️</span><h3>Page checks</h3><p>Fake login forms, hidden redirects and look-alike domains are caught as the page loads.</p></div>
+    <div class="pg-card blush"><span class="ic">🚧</span><h3>Block page</h3><p>Pages confirmed dangerous are stopped with a warning. You can still choose to continue.</p></div>
+    <div class="pg-card sky"><span class="ic">🔗</span><h3>Link outlines</h3><p>Risky links on a page get an outline, and Hachi barks when you hover them.</p></div>
+    <div class="pg-card peach"><span class="ic">📷</span><h3>QR codes</h3><p>QR codes on a page are decoded and checked before you scan them with a phone.</p></div>
+  </div>
+
+  <div class="pg-note">
+    <b>Not on the Chrome Web Store yet.</b> That is why it installs through Developer mode, and Chrome may remind you about it at start-up. This copy is already set to talk to this website, so it works with no extra set-up. You can change the service address any time in the extension's <b>Options</b> page.
+  </div>
+</section>
+
+<!-- TAB 6: ABOUT -->
+<section id="tab-about" class="view-section">
+  <div class="pg-hero">
+    <hachi-dog state="idle"></hachi-dog>
+    <div>
+      <h2>Olfa: your trustworthy companion</h2>
+      <p>Olfa is a phishing and malicious-website shield. Hachi, the Shiba Inu, sniffs out a link before you trust it, and tells you why in plain words.</p>
+      <a class="pg-btn" href="#extension" data-goto="extension">🧩 Get the extension</a>
+    </div>
+  </div>
+
+  <h3 class="pg-h">How a check works</h3>
+  <div class="pg-flow">
+    <div class="pg-card peach"><span class="ic">🔗</span><h3>1. You give a link</h3><p>Paste it in the Scanner, or just browse with the extension on.</p></div><span class="arr">→</span>
+    <div class="pg-card sky"><span class="ic">🔬</span><h3>2. Four checks run</h3><p>Each looks at a different kind of evidence.</p></div><span class="arr">→</span>
+    <div class="pg-card mint"><span class="ic">⚖️</span><h3>3. Evidence is combined</h3><p>Weak signals add up, and a single weak one never decides alone.</p></div><span class="arr">→</span>
+    <div class="pg-card blush"><span class="ic">🐕</span><h3>4. Hachi tells you</h3><p>A verdict, a safety score and the reasons.</p></div>
+  </div>
+
+  <h3 class="pg-h">The four checks</h3>
+  <div class="pg-grid">
+    <div class="pg-card"><span class="ic">🧠</span><h3>Link analysis</h3><p>A machine-learning model reads the link itself: its length, odd characters, how it is built, and whether it imitates a well-known brand. Established popular domains are treated with care to avoid false alarms.</p></div>
+    <div class="pg-card"><span class="ic">🌐</span><h3>Web page check</h3><p>Olfa follows redirects and looks at the page for password forms that send data elsewhere, hidden frames and other tricks used by phishing kits.</p></div>
+    <div class="pg-card"><span class="ic">🔒</span><h3>Certificate and age</h3><p>It checks the site's security certificate and how recently the domain was registered. Brand-new domains asking for logins are a common warning sign.</p></div>
+    <div class="pg-card"><span class="ic">👥</span><h3>Community intelligence</h3><p>Links reported by other people are remembered. The Community tab shows recent reports, and your reports help the next person.</p></div>
+  </div>
+
+  <h3 class="pg-h">What the verdicts mean</h3>
+  <div class="pg-verdicts">
+    <div class="pg-v safe"><b>✅ Safe</b><span>No warning signs found. Hachi wags her tail.</span></div>
+    <div class="pg-v sus"><b>⚠️ Suspicious</b><span>Some signs look off. Be careful with logins, payments and downloads.</span></div>
+    <div class="pg-v bad"><b>⛔ Dangerous</b><span>Strong evidence of phishing or malware. The extension shows a block page.</span></div>
+  </div>
+
+  <h3 class="pg-h">Good to know</h3>
+  <div class="pg-grid">
+    <div class="pg-card sky"><h3>Works even when the service is off</h3><p>The extension has built-in offline rules for look-alike domains and page tricks. The toolbar shows "Offline checks only" when it cannot reach the Olfa service.</p></div>
+    <div class="pg-card mint"><h3>Explained, not just scored</h3><p>Every verdict lists the reasons behind it, so you can judge for yourself instead of trusting a number.</p></div>
+    <div class="pg-card blush"><h3>No tool is perfect</h3><p>Olfa lowers your risk but cannot promise to catch every scam. A brand-new attack may score as safe, so if something feels wrong, trust that feeling and report it.</p></div>
+  </div>
+</section>
+
+<section id="tab-community" class="view-section">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+    <div>
+      <h2 style="margin:0 0 4px">Community Security Intelligence</h2>
+      <p style="margin:0;color:var(--steel);font-size:0.9rem">Live collaborative link assessments. Community reports directly train and verify Olfa's detection engines.</p>
+    </div>
+    <button id="toggleReportBtn" class="ghost" type="button" style="display:flex;align-items:center;gap:6px;padding:9px 18px;border-color:var(--accent);color:var(--accent);font-weight:600;cursor:pointer">
+      ➕ Add Report
+    </button>
+  </div>
+
+  <!-- Add Report Submission Card -->
+  <div id="reportFormBox" class="report-box" style="margin-bottom:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 style="margin:0;font-size:1.05rem;display:flex;align-items:center;gap:8px">📢 Submit Link Classification</h3>
+      <span style="font-size:0.78rem;color:var(--steel)">Feeds directly into Olfa Consensus Model</span>
+    </div>
+    <form id="communityReportForm">
+      <div style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-bottom:12px">
+        <div>
+          <label for="commUrl" style="display:block;font-size:0.84rem;color:var(--steel);margin-bottom:6px">Website URL / Link *</label>
+          <input id="commUrl" type="text" placeholder="https://suspicious-site.com/login" required style="width:100%;padding:10px 12px;background:var(--chalk);border:1px solid var(--line);border-radius:6px;color:var(--ink)">
+        </div>
+        <div>
+          <label for="commVerdict" style="display:block;font-size:0.84rem;color:var(--steel);margin-bottom:6px">Security Classification *</label>
+          <select id="commVerdict" required style="width:100%;padding:10px 12px;background:var(--chalk);border:1px solid var(--line);border-radius:6px;color:var(--ink)">
+            <option value="phishing">🎣 Phishing (Credential / Login theft)</option>
+            <option value="malicious">⚠️ Malicious (Malware, Trojan, Drive-by)</option>
+            <option value="scam">🚨 Scam / Fraud (Fake shopping, investment)</option>
+            <option value="suspicious">❓ Suspicious / Other anomaly</option>
+            <option value="secure">🛡️ Secure (Legitimate & Safe website)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label for="commNote" style="display:block;font-size:0.84rem;color:var(--steel);margin-bottom:6px">Observations / Reason (Optional)</label>
+        <input id="commNote" type="text" placeholder="e.g. Asks for bank login without HTTPS, deceptive domain" maxlength="280" style="width:100%;padding:10px 12px;background:var(--chalk);border:1px solid var(--line);border-radius:6px;color:var(--ink)">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div id="commStatusMsg" style="font-size:0.88rem"></div>
+        <button id="commSubmitBtn" type="submit" style="padding:10px 22px">Post Report</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="community-grid">
+    <div class="community-card">
+      <h3>🚨 Confirmed Threat Feed</h3>
+      <p style="margin:0 0 10px;font-size:0.82rem;color:var(--steel)">Domains verified malicious by multi-reporter consensus.</p>
+      <div id="confirmedFeed" class="feed-list"><p class="note">Loading threat feed…</p></div>
+    </div>
+    <div class="community-card">
+      <h3>🕒 Recent Community Reports</h3>
+      <p style="margin:0 0 10px;font-size:0.82rem;color:var(--steel)">Latest submitted reports and community assessments.</p>
+      <div id="recentReports" class="feed-list"><p class="note">Loading recent reports…</p></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script src="/static/olfa-mascot.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const COLORS = {safe: 'var(--safe)', suspicious: 'var(--warn)', dangerous: 'var(--bad)', gray: 'var(--gray)'};
+const VERDICT = {safe: 'No warning signs found', suspicious: 'Be careful with this link', dangerous: 'Do not open this link'};
+const PILLARS = {threat: 'Link analysis', web: 'Page security', certificate: 'Certificate', intel: 'Community'};
+const STATUS_TEXT = {safe: 'Nothing found', suspicious: 'Warning signs', dangerous: 'Danger signs'};
+
+let lastScanResult = null;
+
+// ==========================================
+// Tabs Navigation Logic
+// ==========================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    const target = $('tab-' + btn.dataset.tab);
+    if (target) target.classList.add('active');
+
+    if (btn.dataset.tab === 'history') renderHistory();
+    if (btn.dataset.tab === 'community') loadCommunityIntel();
+  });
+});
+
+// ==========================================
+// DOM Builder Helper
+// ==========================================
+function el(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === 'class') n.className = v; else if (k === 'style') n.setAttribute('style', v); else n.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null) n.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return n;
+}
+
+function formatMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.*?)\*/g, '<i>$1</i>')
+    .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px">$1</code>')
+    .replace(/\n/g, '<br>');
+}
+
+function token() {
+  try {
+    let t = localStorage.getItem('olfa-token');
+    if (!t) { t = crypto.randomUUID(); localStorage.setItem('olfa-token', t); }
+    return t;
+  } catch (e) {
+    return window.__tok || (window.__tok = crypto.randomUUID());
+  }
+}
+
+// ==========================================
+// Scan Renderer (from Security Lab)
+// ==========================================
+function render(r) {
+  lastScanResult = r;
+  saveToHistory(r);
+  window.olfaMood && olfaMood(r.level);
+
+  const out = $('out'); out.replaceChildren();
+  const c = COLORS[r.level];
+  out.append(el('div', {class: 'verdict', style: '--c:' + c},
+    el('h3', {}, VERDICT[r.level]),
+    el('p', {}, r.final_url && r.final_url !== r.url ? r.url + ' → ' + r.final_url : r.url)));
+
+  // AI Scan Summary Card directly in the Scan Page
+  const aiCard = el('div', {class: 'ai-summary-card', id: 'aiScanSummaryCard'},
+    el('div', {class: 'ai-summary-header'},
+      el('div', {class: 'ai-summary-branding'},
+        el('span', {class: 'ai-summary-mascot'}, '🐕'),
+        el('div', {},
+          el('h4', {style: 'margin:0;font-size:0.98rem;color:var(--accent)'}, 'Hachi AI Explanation'),
+          el('p', {style: 'margin:2px 0 0;font-size:0.8rem;color:var(--steel)'}, 'Live security analysis from Gemini')
+        )
+      ),
+      el('span', {class: 'ai-summary-badge'}, 'AI VERDICT EXPLANATION')
+    ),
+    el('div', {class: 'ai-summary-body', id: 'aiSummaryText'},
+      el('div', {class: 'ai-loading-pulse'}, '🐕 Hachi is analyzing this site and community sentiment…')
+    ),
+    el('div', {class: 'ai-summary-footer'},
+      el('button', {class: 'ghost', id: 'chatMoreBtn', type: 'button', style: 'padding:5px 12px;font-size:0.82rem'}, '💬 Ask Hachi more in Chat')
+    )
+  );
+  out.append(aiCard);
+
+  // Trigger asynchronous LLM explanation for this scan
+  fetchAiScanSummary(r);
+
+  aiCard.querySelector('#chatMoreBtn').onclick = () => {
+    document.querySelector('[data-tab="chat"]').click();
+    const chatInput = $('chatInput');
+    chatInput.value = `Tell me more about the safety of ${r.url}`;
+    chatInput.focus();
+  };
+
+  for (const n of (r.notes || [])) out.append(el('p', {class: 'note', style: 'border-left:4px solid var(--warn);padding-left:10px;margin:0 0 16px'}, n));
+  const lanes = el('div', {class: 'lanes'});
+  for (const [k, label] of Object.entries(PILLARS)) {
+    const p = r.pillars[k], off = p.status !== 'ok';
+    const col = off ? COLORS.gray : COLORS[p.level];
+    lanes.append(el('div', {class: 'lane', style: '--c:' + col},
+      el('b', {}, label),
+      el('span', {class: 'st'}, off ? 'Not checked' : STATUS_TEXT[p.level]),
+      off ? el('span', {}, ' · ' + p.status) : null));
+  }
+  out.append(lanes);
+  if (!r.coverage.complete) out.append(el('p', {class: 'note'}, 'Some checks could not run, so this result may miss things: ' + r.coverage.unavailable_pillars.map(k => PILLARS[k]).join(', ') + '.'));
+
+  const comp = r.components;
+  if (comp) {
+    const pageTxt = comp.page_security.grade ? 'Grade ' + comp.page_security.grade + ' (' + comp.page_security.score + '/100)' + (comp.page_security.findings.length ? ', ' + comp.page_security.findings.length + ' warning(s)' : ', no page warnings') : 'Not checked (' + comp.page_security.status + ')';
+    const certTxt = comp.certificate.level && comp.certificate.level !== 'gray'
+      ? (comp.certificate.trusted ? 'Trusted' : 'Not trusted') + (comp.certificate.days_left != null ? ', ' + comp.certificate.days_left + ' days left' : '') + (comp.certificate.findings.length ? ', ' + comp.certificate.findings.length + ' warning(s)' : '')
+      : 'Not checked (' + comp.certificate.status + ')';
+    const mlTxt = comp.ml.risk_pct == null ? 'Not available' : comp.ml.popular_domain ? 'Ignored: very well-known site'
+      : comp.ml.risk_pct + '% phishing-like, ' + (comp.ml.counted ? 'counted because other checks agree' : 'not counted on its own');
+    const comTxt = comp.community.status === 'unknown' ? 'No reports yet' : comp.community.status.replace('_', ' ') + ' (' + comp.community.unsafe_reports + ' unsafe, ' + comp.community.safe_reports + ' safe)';
+    const rules = el('details', {}, el('summary', {}, 'How these are combined'), el('ul', {class: 'note'}, comp.overall.rules.map(t => el('li', {}, t))));
+    out.append(el('section', {class: 'block'}, el('h4', {}, 'How the verdict was reached'),
+      el('dl', {}, el('dt', {}, 'Link model'), el('dd', {}, mlTxt), el('dt', {}, 'Page security'), el('dd', {}, pageTxt),
+        el('dt', {}, 'Certificate'), el('dd', {}, certTxt), el('dt', {}, 'Community'), el('dd', {}, comTxt),
+        el('dt', {}, 'Overall'), el('dd', {}, VERDICT[comp.overall.level] + ' (risk ' + Math.round(comp.overall.score * 100) + '/100)')),
+      rules));
+  }
+
+  const checks = r.checks;
+  if (checks && checks.length) {
+    const CHIP = {fired: 'Found', clean: 'Checked, nothing found', not_run: 'Not checked', not_applicable: 'Not applicable', unknown: 'No data'};
+    const box = el('section', {class: 'block'}, el('h4', {}, 'What was checked on this link'));
+    const list = el('div', {class: 'checks'});
+    for (const row of checks) {
+      const col = row.state === 'fired'
+        ? ({high: COLORS.dangerous, medium: COLORS.suspicious, low: COLORS.gray})[row.severity || 'medium']
+        : row.state === 'clean' ? COLORS.safe : COLORS.gray;
+      const firedTxt = row.reasons.map(x => x.localized || x.message).join('  ');
+      list.append(el('div', {class: 'check', style: '--c:' + col},
+        el('span', {class: 'name'}, row.label),
+        el('span', {class: 'chip'}, CHIP[row.state] || row.state),
+        firedTxt ? el('span', {class: 'detail'}, firedTxt) : null,
+        row.note ? el('span', {class: 'detail'}, row.note) : null));
+    }
+    box.append(list);
+    out.append(box);
+  }
+
+  if (r.reasons && r.reasons.length) {
+    const ul = el('ul', {class: 'reasons'});
+    for (const x of r.reasons) ul.append(el('li', {style: '--c:' + ({high: COLORS.dangerous, medium: COLORS.suspicious, low: COLORS.gray})[x.severity]},
+      x.localized || x.message, x.localized && x.localized !== x.message ? el('small', {}, x.message) : null));
+    out.append(el('section', {class: 'block'}, el('h4', {}, 'Why'), ul));
+  } else out.append(el('section', {class: 'block'}, el('h4', {}, 'Why'), el('p', {class: 'note'}, 'None of the checks found a problem. That lowers the risk but does not prove a site is safe.')));
+
+  if (r.redirects && r.redirects.length > 1) {
+    const box = el('section', {class: 'block'}, el('h4', {}, 'Where the link goes'));
+    r.redirects.forEach((h, i) => box.append(el('div', {class: 'hop'}, el('span', {class: 'k'}, 'Step ' + (i + 1) + (h.status ? ' · ' + h.status : '')), el('span', {}, h.url))));
+    out.append(box);
+  }
+
+  const cert = r.certificate;
+  if (cert && cert.chain && cert.chain.length) {
+    const leaf = cert.chain[0];
+    const dl = el('dl', {},
+      el('dt', {}, 'Issued to'), el('dd', {}, leaf.subject.cn || '—'),
+      el('dt', {}, 'Issued by'), el('dd', {}, leaf.issuer.cn || '—'),
+      el('dt', {}, 'Valid'), el('dd', {}, leaf.not_before.slice(0, 10) + ' to ' + leaf.not_after.slice(0, 10) + (cert.days_left != null ? ' (' + cert.days_left + ' days left)' : '')),
+      el('dt', {}, 'Trusted by this system'), el('dd', {}, cert.verified ? 'Yes' : 'No' + (cert.verify_error ? ': ' + cert.verify_error : '')),
+      el('dt', {}, 'Connection'), el('dd', {}, [cert.tls_version, leaf.key].filter(Boolean).join(' · ')));
+    const chain = el('div', {class: 'chain'});
+    cert.chain.forEach((c, i) => chain.append(el('div', {style: '--i:' + i}, c.subject.cn || c.subject.rfc4514)));
+    out.append(el('section', {class: 'block'}, el('h4', {}, 'Certificate'), dl, el('p', {class: 'note'}, 'Chain, from the site down to the authority:'), chain));
+  }
+
+  const w = r.web_assessment;
+  if (w && w.fetched) {
+    const ul = el('ul', {class: 'reasons'});
+    for (const ch of w.checks) ul.append(el('li', {style: '--c:' + (ch.ok ? COLORS.safe : COLORS.gray)}, (ch.ok ? 'Present: ' : 'Missing: ') + ch.name));
+    out.append(el('section', {class: 'block'}, el('h4', {}, 'Page security grade ' + w.grade), el('p', {class: 'note'}, 'Missing headers are common on honest sites, so this grade only nudges the verdict.'), ul));
+  }
+
+  const i = r.intel;
+  if (i) {
+    const rep = el('section', {class: 'block'}, el('h4', {}, 'Community reports'),
+      el('p', {class: 'note'}, i.threat_reports + ' report(s) as unsafe, ' + i.safe_reports + ' as safe for ' + i.domain + '. A site is only called confirmed after several independent people agree.'));
+    const msg = el('p', {class: 'msg'});
+    const row = el('div', {class: 'report'});
+    for (const [v, label] of [['phishing', 'Report as phishing'], ['scam', 'Report as scam'], ['safe', 'This site is safe']]) {
+      const b = el('button', {class: 'ghost', type: 'button'}, label);
+      b.onclick = async () => {
+        b.disabled = true;
+        const res = await fetch('/report', {method: 'POST', headers: {'content-type': 'application/json', 'x-reporter-token': token()}, body: JSON.stringify({url: r.url, verdict: v})});
+        const j = await res.json();
+        msg.className = 'msg' + (res.ok ? '' : ' err');
+        msg.textContent = res.ok ? 'Thanks. Reports for ' + j.domain + ': ' + j.threat_reports + ' unsafe, ' + j.safe_reports + ' safe (' + j.status.replace('_', ' ') + ').' : (j.detail || 'Could not send the report.');
+        b.disabled = false;
+      };
+      row.append(b);
+    }
+    rep.append(row, msg);
+    out.append(rep);
+  }
+
+  if (r.ml) out.append(el('p', {class: 'note'}, r.ml.popular_domain ? 'This is a very well-known site, so the link-pattern model is not used.' : 'The link-pattern model rated this host ' + Math.round(r.ml.risk * 100) + '% phishing-like. It is a supporting signal and misses many attacks on its own.'));
+}
+
+// Asynchronously fetch AI Scan Explanation
+async function fetchAiScanSummary(scanData) {
+  const box = $('aiSummaryText');
+  if (!box) return;
+  try {
+    const promptMsg = "Explain this scan result in 2 to 3 concise, friendly sentences. Explain what the verdict means, what the risk score implies, mention what the community thinks if reports exist, and give practical advice.";
+    const res = await fetch('/chat', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({
+        message: promptMsg,
+        model: 'gemini-2.5-flash',
+        context: {
+          url: scanData.url,
+          final_url: scanData.final_url,
+          level: scanData.level,
+          score: scanData.score,
+          reasons: scanData.reasons,
+          community: scanData.intel,
+          checks: scanData.checks
+        }
+      })
+    });
+    const j = await res.json();
+    if (box) {
+      box.innerHTML = formatMarkdown(j.answer || 'Hachi analyzed the scan findings.');
+    }
+  } catch (e) {
+    if (box) {
+      box.innerHTML = '🐕 Hachi here! Scan completed. Review the checks below to verify certificate and domain indicators.';
+    }
+  }
+}
+
+// Scanner Submit Event
+$('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('go'); btn.disabled = true; btn.textContent = 'Checking…';
+  window.olfaMood && olfaMood('scanning');
+  $('out').replaceChildren(el('p', {class: 'note'}, 'Following the link and checking the page, the certificate and community reports…'));
+  try {
+    const res = await fetch('/scan', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({url: $('u').value.trim(), deep: !$('quick').checked, lang: $('lang').value})
+    });
+    const j = await res.json();
+    if (!res.ok) $('out').replaceChildren(el('p', {class: 'err'}, 'Could not check that link. ' + (j.detail || '') + ' Enter a full address that starts with http:// or https://.'));
+    if (!res.ok) window.olfaMood && olfaMood('idle', 'That address did not work. Try a full link starting with https://');
+    else render(j);
+  } catch (err) {
+    $('out').replaceChildren(el('p', {class: 'err'}, 'Could not reach the Olfa service. Check that it is running and try again.'));
+    window.olfaMood && olfaMood('offline');
+  }
+  btn.disabled = false; btn.textContent = 'Check link';
+});
+
+// ==========================================
+// History Management
+// ==========================================
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('olfa_scan_history') || '[]'); } catch { return []; }
+}
+
+function saveToHistory(scanData) {
+  const history = getHistory();
+  const record = {
+    id: Date.now(),
+    url: scanData.url,
+    final_url: scanData.final_url,
+    level: scanData.level,
+    score: scanData.score,
+    timestamp: new Date().toLocaleString(),
+    reasons: (scanData.reasons || []).map(r => r.localized || r.message),
+    checksCount: (scanData.checks || []).length,
+    raw: scanData
+  };
+  history.unshift(record);
+  if (history.length > 50) history.pop();
+  localStorage.setItem('olfa_scan_history', JSON.stringify(history));
+  updateHistoryBadge();
+}
+
+function updateHistoryBadge() {
+  const count = getHistory().length;
+  const badge = $('histCount');
+  if (badge) badge.textContent = count ? `(${count})` : '';
+}
+
+function renderHistory() {
+  const container = $('historyList');
+  const items = getHistory();
+  container.replaceChildren();
+
+  if (!items.length) {
+    container.append(el('p', {class: 'note'}, 'No past scans recorded yet. Enter a link in the Scanner tab to begin!'));
+    return;
+  }
+
+  items.forEach(item => {
+    const card = el('div', {class: 'history-item'});
+    const summary = el('div', {class: 'history-summary'},
+      el('div', {style: 'display:flex;flex-direction:column;gap:2px'},
+        el('span', {class: 'history-url'}, item.url),
+        el('span', {style: 'font-size:0.78rem;color:var(--steel)'}, item.timestamp)),
+      el('div', {class: 'history-meta'},
+        el('span', {class: `history-pill ${item.level}`}, item.level),
+        el('span', {style: 'color:var(--steel);font-size:0.8rem'}, '▼'))
+    );
+
+    const details = el('div', {class: 'history-details'},
+      el('p', {style: 'margin:0 0 8px'}, el('b', {}, 'Verdict: '), VERDICT[item.level] || item.level, ' (Risk: ' + Math.round((item.score||0)*100) + '/100)'),
+      item.reasons && item.reasons.length ? el('ul', {style: 'margin:0 0 10px;padding-left:18px;color:var(--steel)'}, item.reasons.map(r => el('li', {}, r))) : el('p', {class: 'note'}, 'No negative findings recorded.'),
+      el('button', {class: 'ghost', style: 'padding:4px 10px;font-size:0.8rem;cursor:pointer'}, '🔄 Re-open in Scanner')
+    );
+
+    details.querySelector('button').onclick = (e) => {
+      e.stopPropagation();
+      $('u').value = item.url;
+      document.querySelector('[data-tab="scanner"]').click();
+      render(item.raw);
+    };
+
+    summary.onclick = () => card.classList.toggle('open');
+    card.append(summary, details);
+    container.append(card);
+  });
+}
+
+$('clearHistBtn').onclick = () => {
+  if (confirm('Clear all stored scan history?')) {
+    localStorage.removeItem('olfa_scan_history');
+    renderHistory();
+    updateHistoryBadge();
+  }
+};
+
+// ==========================================
+// AI Chat Tab Logic (Direct Backend /chat)
+// ==========================================
+$('chatForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = $('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const msgsBox = $('chatMessages');
+  msgsBox.append(el('div', {class: 'chat-msg user'}, msg));
+  msgsBox.scrollTop = msgsBox.scrollHeight;
+
+  window.olfaChatMood && olfaChatMood(true);
+  const thinking = el('div', {class: 'chat-msg assistant sys'}, 'Hachi is analyzing…');
+  msgsBox.append(thinking);
+  msgsBox.scrollTop = msgsBox.scrollHeight;
+
+  try {
+    const res = await fetch('/chat', {
+      method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({
+        message: msg,
+        model: 'gemini-2.5-flash',
+        context: lastScanResult ? {
+          url: lastScanResult.url,
+          final_url: lastScanResult.final_url,
+          level: lastScanResult.level,
+          score: lastScanResult.score,
+          reasons: lastScanResult.reasons,
+          community: lastScanResult.intel
+        } : null
+      })
+    });
+    const data = await res.json();
+    thinking.remove();
+    window.olfaChatMood && olfaChatMood(false);
+    const ansDiv = el('div', {class: 'chat-msg assistant'});
+    ansDiv.innerHTML = formatMarkdown(data.answer || 'Received an empty response.');
+    msgsBox.append(ansDiv);
+  } catch (err) {
+    thinking.remove();
+    window.olfaChatMood && olfaChatMood(false);
+    msgsBox.append(el('div', {class: 'chat-msg assistant err'}, 'Could not contact assistant: ' + err.message));
+  }
+  msgsBox.scrollTop = msgsBox.scrollHeight;
+});
+
+// ==========================================
+// Community Tab Logic
+// ==========================================
+// Toggle Add Report Box
+$('toggleReportBtn').addEventListener('click', () => {
+  const box = $('reportFormBox');
+  if (box.style.display === 'none') {
+    box.style.display = 'block';
+    $('commUrl').focus();
+    $('toggleReportBtn').textContent = '✖ Close Form';
+  } else {
+    box.style.display = 'none';
+    $('toggleReportBtn').textContent = '➕ Add Report';
+  }
+});
+
+// Submit Community Classification
+$('communityReportForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('commSubmitBtn');
+  const msgBox = $('commStatusMsg');
+  const url = $('commUrl').value.trim();
+  const verdict = $('commVerdict').value;
+  const note = $('commNote').value.trim();
+
+  if (!url) return;
+  btn.disabled = true;
+  btn.textContent = 'Posting…';
+  msgBox.textContent = '';
+
+  try {
+    const res = await fetch('/report', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-reporter-token': token()
+      },
+      body: JSON.stringify({ url, verdict, note })
+    });
+    const j = await res.json();
+    if (res.ok) {
+      msgBox.style.color = 'var(--safe)';
+      msgBox.textContent = `✅ Report recorded for ${j.domain}! Consensus updated (${j.threat_reports} threat, ${j.safe_reports} safe).`;
+      $('commUrl').value = '';
+      $('commNote').value = '';
+      // Refresh both community feeds immediately
+      loadCommunityIntel();
+    } else {
+      msgBox.style.color = 'var(--bad)';
+      msgBox.textContent = '⚠️ ' + (j.detail || 'Could not post report.');
+    }
+  } catch (err) {
+    msgBox.style.color = 'var(--bad)';
+    msgBox.textContent = '⚠️ Network error: ' + err.message;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Post Report';
+});
+
+async function loadCommunityIntel() {
+  const feedBox = $('confirmedFeed');
+  const repBox = $('recentReports');
+
+  try {
+    const [feedRes, repRes] = await Promise.all([
+      fetch('/intel/feed').then(r => r.json()),
+      fetch('/intel/recent?limit=30').then(r => r.json())
+    ]);
+
+    feedBox.replaceChildren();
+    if (feedRes.domains && feedRes.domains.length) {
+      feedRes.domains.forEach(d => {
+        const item = el('div', {class: 'feed-item'},
+          el('div', {style: 'display:flex;align-items:center;justify-content:space-between;gap:8px'},
+            el('b', {style: 'color:var(--bad)'}, '⛔ ' + d.domain),
+            el('span', {class: 'badge-verdict phishing'}, d.verdict || 'confirmed')
+          ),
+          el('div', {style: 'color:var(--steel);font-size:0.8rem;display:flex;align-items:center;justify-content:space-between;gap:8px'},
+            el('span', {}, d.reports + ' reports confirmed · weight ' + (d.weight || '2.5')),
+            el('button', {class: 'ghost', style: 'padding:2px 8px;font-size:0.75rem', type: 'button'}, '🔍 Scan')
+          )
+        );
+        item.querySelector('button').onclick = () => {
+          $('u').value = 'https://' + d.domain;
+          document.querySelector('[data-tab="scanner"]').click();
+          $('f').requestSubmit();
+        };
+        feedBox.append(item);
+      });
+    } else {
+      feedBox.append(el('p', {class: 'note'}, 'No confirmed malicious domains reported yet.'));
+    }
+
+    repBox.replaceChildren();
+    if (repRes.reports && repRes.reports.length) {
+      repRes.reports.forEach(r => {
+        const dateStr = r.created ? new Date(r.created * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'recently';
+        const v = (r.verdict || '').toLowerCase();
+        const vClass = (v === 'safe' || v === 'secure') ? 'safe' : (v === 'phishing' ? 'phishing' : (v === 'malware' || v === 'malicious' ? 'malware' : 'scam'));
+        const vLabel = (v === 'safe' || v === 'secure') ? '🛡️ SECURE' : (v === 'phishing' ? '🎣 PHISHING' : (v === 'malware' || v === 'malicious' ? '⚠️ MALICIOUS' : '🚨 ' + v.toUpperCase()));
+        
+        const item = el('div', {class: 'feed-item'},
+          el('div', {style: 'display:flex;align-items:center;justify-content:space-between;gap:8px'},
+            el('b', {}, r.domain),
+            el('span', {class: 'badge-verdict ' + vClass}, vLabel)
+          ),
+          r.url && r.url !== r.domain ? el('div', {style: 'color:var(--steel);font-size:0.78rem;font-family:monospace;word-break:break-all'}, r.url) : null,
+          r.note ? el('div', {style: 'font-size:0.82rem;color:var(--ink);background:rgba(255,255,255,0.03);padding:4px 8px;border-radius:4px;margin-top:2px'}, '💬 ' + r.note) : null,
+          el('div', {style: 'color:var(--steel);font-size:0.78rem;display:flex;align-items:center;justify-content:space-between;margin-top:2px'},
+            el('span', {}, 'Reported ' + dateStr),
+            el('button', {class: 'ghost', style: 'padding:2px 8px;font-size:0.75rem', type: 'button'}, '🔍 Scan')
+          )
+        );
+        item.querySelector('button').onclick = () => {
+          $('u').value = r.url || ('https://' + r.domain);
+          document.querySelector('[data-tab="scanner"]').click();
+          $('f').requestSubmit();
+        };
+        repBox.append(item);
+      });
+    } else {
+      repBox.append(el('p', {class: 'note'}, 'No community reports filed yet.'));
+    }
+  } catch (err) {
+    feedBox.replaceChildren(el('p', {class: 'note err'}, 'Failed to load feed: ' + err.message));
+    repBox.replaceChildren(el('p', {class: 'note err'}, 'Failed to load reports: ' + err.message));
+  }
+}
+
+// Initial setup
+updateHistoryBadge();
+</script>
+<script src="/static/olfa-pages.js"></script>
+</body>
+</html>

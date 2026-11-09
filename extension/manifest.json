@@ -1,0 +1,90 @@
+{
+  "manifest_version": 3,
+  "name": "Olfa \u2014 AI Phishing & Malicious Web Shield",
+  "version": "1.5.0",
+  "description": "Real-time AI threat detection, navigation interceptor, QR quishing scanner, pop-up ad blocker, and trust nutrition label.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "declarativeNetRequest",
+    "webNavigation"
+  ],
+  "optional_permissions": [
+    "cookies"
+  ],
+  "host_permissions": [
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "<all_urls>"
+  ],
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+  "icons": {
+    "128": "logo_128.png"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Olfa Trust & Security Check"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content/fingerprint.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content/banner.js",
+        "vendor/jsQR.js",
+        "content/agent.js",
+        "content/mascot.js"
+      ],
+      "css": [
+        "content/banner.css",
+        "content/style.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/*",
+        "warning.html",
+        "vendor/*",
+        "mascot.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

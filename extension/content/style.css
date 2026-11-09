@@ -1,0 +1,20 @@
+/* Highlight styles for links and QR targets the extension flagged on the page.
+   Loaded by the content script only; a page can override these with !important
+   but that is itself a signal the user can see in DevTools. */
+a.olfa-unsafe.olfa-unsafe,
+img.olfa-unsafe.olfa-unsafe,
+canvas.olfa-unsafe.olfa-unsafe {
+  outline: 2px solid #dc2626 !important;
+  outline-offset: 1px !important;
+  background-color: rgba(220, 38, 38, 0.08) !important;
+  border-radius: 2px;
+}
+
+a.olfa-suspicious,
+img.olfa-suspicious,
+canvas.olfa-suspicious {
+  outline: 2px dashed #d97706 !important;
+  outline-offset: 1px !important;
+  background-color: rgba(217, 119, 6, 0.07) !important;
+  border-radius: 2px;
+}

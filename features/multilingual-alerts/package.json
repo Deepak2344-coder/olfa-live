@@ -1,0 +1,12 @@
+{
+  "name": "olfa-multilingual-alerts",
+  "version": "1.0.0",
+  "description": "Olfa multilingual alerts — warning copy in EN/HI/BN keyed by reason code",
+  "main": "lib/alerts.js",
+  "scripts": {
+    "test": "node --test tests/alerts.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

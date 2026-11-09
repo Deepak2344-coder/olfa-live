@@ -1,0 +1,15 @@
+# runtime
+fastapi
+uvicorn
+requests
+cryptography
+tldextract
+numpy
+xgboost
+# tests / UI check
+pytest
+playwright
+# only needed to retrain (training/train_host_model.py, training/export_portable.py)
+# pandas
+# scikit-learn
+# joblib

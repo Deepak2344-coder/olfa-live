@@ -1,0 +1,30 @@
+{
+  "_comment": "Bundled shortener list. Small and hand-checked, not a live feed: extend as needed.",
+  "domains": [
+    "bit.ly",
+    "bitly.com",
+    "tinyurl.com",
+    "t.co",
+    "goo.gl",
+    "ow.ly",
+    "is.gd",
+    "buff.ly",
+    "rebrand.ly",
+    "cutt.ly",
+    "shorturl.at",
+    "rb.gy",
+    "tiny.cc",
+    "lnkd.in",
+    "t.ly",
+    "shorte.st",
+    "adf.ly",
+    "s.id",
+    "v.gd",
+    "clck.ru",
+    "bit.do",
+    "qr.ae",
+    "x.co",
+    "wa.link",
+    "linktr.ee"
+  ]
+}

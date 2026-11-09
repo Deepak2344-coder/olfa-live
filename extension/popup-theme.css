@@ -1,0 +1,65 @@
+/* Olfa x Hachi popup theme v2: white + soft peach pastels, light only. Loaded after popup.css. */
+:root{
+  --bg-main:#FFFFFF; --bg-card:#FFFFFF; --bg-card-subtle:#FFF4E6; --border:#FFE3C4;
+  --text-main:#5A2F14; --text-muted:#9A7358; --accent:#4AA89D; --accent-soft:#DDF3EC;
+  --orange:#FFB45F; --peach:#FFD9B0; --blush:#FFE1DC; --mint:#DDF3EC; --sky:#E3F1FB;
+  --safe:#2FA676; --safe-bg:#DDF3EC; --safe-ink:#1E7F58;
+  --warning:#D98A12; --warning-bg:#FFEBC8; --warning-ink:#9A5F00;
+  --danger:#E0584C; --danger-bg:#FFE1DC; --danger-ink:#B23A30;
+  --inset:#FFF9F0; --shadow:0 4px 12px rgba(255,160,90,.18);
+}
+body{font-family:ui-rounded,"Nunito","Quicksand","Segoe UI",system-ui,sans-serif;color:var(--text-main);
+  background:radial-gradient(260px 200px at 0 0,var(--blush),transparent 70%),radial-gradient(280px 220px at 100% 20%,var(--mint),transparent 70%),#fff}
+header{background:#fff;border-bottom:0;box-shadow:var(--shadow);border-radius:0 0 22px 22px;position:relative;z-index:1}
+.hachi-avatar{border-radius:12px;background:var(--bg-card-subtle);border:3px solid var(--peach)}
+.logo{color:var(--text-main);font-weight:900} .logo .accent{color:#E8832A}
+.tagline{color:var(--text-muted)}
+.header-controls select{background:var(--bg-card-subtle);border:0;border-radius:999px;color:var(--text-main);font-weight:700;padding:4px 8px}
+.icon-btn{background:var(--bg-card-subtle);border:0;border-radius:50%;color:var(--text-main)}
+.icon-btn:hover{background:var(--peach);color:var(--text-main)}
+
+/* mascot hero */
+.hero{display:flex;align-items:center;gap:8px;padding:30px 14px 2px;position:relative;background:none}
+.hero hachi-dog{flex:none;margin:-10px 0 -10px -8px;filter:drop-shadow(0 8px 10px rgba(255,160,90,.3))}
+.bubble{position:relative;flex:1;background:#fff;border:0;border-radius:22px;padding:11px 14px;box-shadow:var(--shadow);min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:2px;transition:background .3s}
+.bubble::before{content:"";position:absolute;left:-6px;top:50%;width:14px;height:14px;background:inherit;border-radius:4px;transform:translateY(-50%) rotate(45deg)}
+.bubble b{font-size:14.5px;font-weight:900;line-height:1.2}
+.bubble span{font-size:11.5px;color:var(--text-muted);line-height:1.35}
+.hero[data-mood=scanning] .bubble{background:var(--sky)}
+.hero[data-mood=safe] .bubble{background:var(--mint)} .hero[data-mood=safe] .bubble b{color:var(--safe-ink)}
+.hero[data-mood=suspicious] .bubble{background:#FFF1D6} .hero[data-mood=suspicious] .bubble b{color:var(--warning-ink)}
+.hero[data-mood=dangerous] .bubble{background:var(--blush)} .hero[data-mood=dangerous] .bubble b{color:var(--danger-ink)}
+.hero[data-mood=nonweb] .bubble{background:#F4EFEA}
+
+.target-bar{background:transparent;border-bottom:0;padding-top:6px}
+.target-host{color:var(--text-main)}
+.badge-safe{background:var(--safe-bg);color:var(--safe-ink);border-color:transparent}
+.badge-warning{background:var(--warning-bg);color:var(--warning-ink);border-color:transparent}
+.badge-danger{background:var(--danger-bg);color:var(--danger-ink);border-color:transparent}
+.badge-neutral{background:var(--bg-card-subtle);color:var(--text-muted);border-color:transparent}
+
+/* pill tabs */
+.nav-tabs{background:transparent;border-bottom:0;gap:6px;padding:4px 12px 2px}
+.nav-tab{flex:none;border:0;border-radius:999px;background:#fff;box-shadow:var(--shadow);padding:6px 11px;color:var(--text-muted)}
+.nav-tab:hover{background:var(--bg-card-subtle)}
+.nav-tab.active{background:var(--peach);color:var(--text-main);border:0}
+
+.card,.pillar-card{border:0;border-radius:20px;box-shadow:var(--shadow);background:#fff}
+.score-card{background:linear-gradient(135deg,#fff,var(--bg-card-subtle))}
+.chip{background:var(--bg-card-subtle);border:0;color:var(--text-muted)}
+.cert-chain-flow,.cert-node,textarea#msg-input,.report-note-box input{background:var(--inset);color:var(--text-main);border:2px solid var(--border);border-radius:14px}
+.node-leaf{color:var(--accent);border-color:var(--accent)} .node-inter{color:var(--text-muted)} .node-root{color:var(--safe-ink);border-color:var(--safe)}
+.primary-btn{background:var(--orange);color:#5A2A0C;border:0;border-radius:999px;font-weight:800;box-shadow:0 3px 0 #F0993F}
+.primary-btn:hover{background:#FFBE75}
+.primary-btn:active{transform:translateY(2px);box-shadow:none}
+.small-btn{background:var(--bg-card-subtle);color:var(--text-main);border:0;border-radius:999px}
+.msg-highlighted mark{background:var(--warning-bg);color:var(--warning-ink)}
+.btn-danger{background:var(--danger-bg);color:var(--danger-ink);border-color:transparent;border-radius:999px}
+.btn-warning{background:var(--warning-bg);color:var(--warning-ink);border-color:transparent;border-radius:999px}
+.btn-safe{background:var(--safe-bg);color:var(--safe-ink);border-color:transparent;border-radius:999px}
+.site-btn{display:block;width:auto;position:absolute;right:14px;top:8px;margin:0;padding:4px 12px;font:800 11px/1.3 inherit;border:0;border-radius:999px;background:var(--mint);color:#2E8A7E;box-shadow:0 2px 0 #BFE3D8}
+.site-btn:hover{background:#C9EBDF}
+footer{background:transparent;border-top:2px dashed var(--border)}
+.dot-red{color:var(--danger)}
+@media (prefers-reduced-motion:reduce){.bubble{transition:none}}
+.nav-tabs{flex-wrap:wrap;overflow-x:visible}.nav-tab{padding:5px 10px;font-size:10.5px}
